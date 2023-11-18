@@ -130,11 +130,13 @@ class Contract:
             self.stack.append(bytes_num)
             return
 
+        # GASLIMIT
         elif opcode == "45":
             self.program_counter += 1
             self.stack.append("ffffffffffff")
             return
 
+        # BASEFEE
         elif opcode == "48":
             self.program_counter += 1
             self.stack.append("a")
