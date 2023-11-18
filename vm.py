@@ -40,6 +40,69 @@ class Contract:
             self.stopped = True
             return
 
+        # ADD a b
+        elif opcode == "01":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = hex((a + b) % 2**256)[2:]
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # MUL a b
+        elif opcode == "02":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = hex((a * b) % 2**256)[2:]
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # SUB a b
+        elif opcode == "03":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = hex((a - b) % 2**256)[2:]
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # DIV a b
+        elif opcode == "04":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = hex(a // b)[2:]
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # LT a b
+        elif opcode == "10":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = "1" if a < b else "0"
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # GT a b
+        elif opcode == "11":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = "1" if a > b else "0"
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # EQ a b
+        elif opcode == "14":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = "1" if a == b else "0"
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
         # PUSH0
         elif opcode == "5f":
             self.program_counter += 1

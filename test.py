@@ -65,3 +65,75 @@ class ContractTestCase(unittest.TestCase):
         contract = Contract(bytecode="48")
         contract.execute()
         self.assertEqual(contract.stack, ["a"])
+
+    def test_add(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a01'_
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # ADD
+        contract = Contract(bytecode="600a600a01")
+        contract.execute()
+        self.assertEqual(contract.stack, ["14"])
+
+    def test_mul(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a02'_
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # MUL
+        contract = Contract(bytecode="600a600a02")
+        contract.execute()
+        self.assertEqual(contract.stack, ["64"])
+
+    def test_sub(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a03'_
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # SUB
+        contract = Contract(bytecode="600a600a03")
+        contract.execute()
+        self.assertEqual(contract.stack, ["0"])
+
+    def test_div(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a04'_
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # DIV
+        contract = Contract(bytecode="600a600a04")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1"])
+
+    def test_lt(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600910600a600a10'_
+        # PUSH1 0x0a
+        # PUSH1 0x09
+        # LT
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # LT
+        contract = Contract(bytecode="600a600910600a600a10")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "0"])
+
+    def test_gt(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6009600a11600a600a11'_
+        # PUSH1 0x09
+        # PUSH1 0x0a
+        # GT
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # GT
+        contract = Contract(bytecode="6009600a11600a600a11")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "0"])
+
+    def test_eq(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a146005600a14'_
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # EQ
+        # PUSH1 0x05
+        # PUSH1 0x0a
+        # EQ
+        contract = Contract(bytecode="600a600a146005600a14")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "0"])

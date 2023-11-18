@@ -7,10 +7,10 @@ An in-progress implementation of the EVM in python.
 | Code | Name           | Implemented |
 |------|----------------|-------------|
 | 00   | STOP           | ✅           |
-| 01   | ADD            |             |
-| 02   | MUL            |             |
-| 03   | SUB            |             |
-| 04   | DIV            |             |
+| 01   | ADD            | ✅           |
+| 02   | MUL            | ✅           |
+| 03   | SUB            | ✅           |
+| 04   | DIV            | ✅           |
 | 05   | SDIV           |             |
 | 06   | MOD            |             |
 | 07   | SMOD           |             |
@@ -18,11 +18,11 @@ An in-progress implementation of the EVM in python.
 | 09   | MULMOD         |             |
 | 0A   | EXP            |             |
 | 0B   | SIGNEXTEND     |             |
-| 10   | LT             |             |
-| 11   | GT             |             |
+| 10   | LT             | ✅           |
+| 11   | GT             | ✅           |
 | 12   | SLT            |             |
 | 13   | SGT            |             |
-| 14   | EQ             |             |
+| 14   | EQ             | ✅           |
 | 15   | ISZERO         |             |
 | 16   | AND            |             |
 | 17   | OR             |             |
