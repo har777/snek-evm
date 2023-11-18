@@ -67,6 +67,16 @@ class Contract:
             self.stack.append(bytes_num)
             return
 
+        elif opcode == "45":
+            self.program_counter += 1
+            self.stack.append("ffffffffffff")
+            return
+
+        elif opcode == "48":
+            self.program_counter += 1
+            self.stack.append("a")
+            return
+
         raise Exception(f"OPCODE {opcode} not implemented")
 
     def execute(self):

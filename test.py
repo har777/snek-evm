@@ -51,3 +51,17 @@ class ContractTestCase(unittest.TestCase):
         contract = Contract(bytecode="7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000")
         contract.execute()
         self.assertEqual(contract.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "0"])
+
+    def test_gaslimit(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
+        # GASLIMIT
+        contract = Contract(bytecode="45")
+        contract.execute()
+        self.assertEqual(contract.stack, ["ffffffffffff"])
+
+    def test_basefee(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='48'_
+        # BASEFEE
+        contract = Contract(bytecode="48")
+        contract.execute()
+        self.assertEqual(contract.stack, ["a"])
