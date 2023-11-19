@@ -67,43 +67,55 @@ class ContractTestCase(unittest.TestCase):
         self.assertEqual(contract.stack, ["a"])
 
     def test_add(self):
-        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a01'_
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a017yyyyf600101'~zzzzzffy~~%01yz~_
         # PUSH1 0x0a
         # PUSH1 0x0a
         # ADD
-        contract = Contract(bytecode="600a600a01")
+        # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH1 0x01
+        # ADD
+        contract = Contract(bytecode="600a600a017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600101")
         contract.execute()
-        self.assertEqual(contract.stack, ["14"])
+        self.assertEqual(contract.stack, ["14", "0"])
 
     def test_mul(self):
-        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a02'_
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a027yyyyf600202'~zzzzzffy~~%01yz~_
         # PUSH1 0x0a
         # PUSH1 0x0a
         # MUL
-        contract = Contract(bytecode="600a600a02")
+        # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH1 0x02
+        # MUL
+        contract = Contract(bytecode="600a600a027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600202")
         contract.execute()
-        self.assertEqual(contract.stack, ["64"])
+        self.assertEqual(contract.stack, ["64", "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"])
 
     def test_sub(self):
-        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a03'_
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~a~a03~1~003'~600%01~_
         # PUSH1 0x0a
         # PUSH1 0x0a
         # SUB
-        contract = Contract(bytecode="600a600a03")
+        # PUSH1 0x01
+        # PUSH1 0x00
+        # SUB
+        contract = Contract(bytecode="600a600a036001600003")
         contract.execute()
-        self.assertEqual(contract.stack, ["0"])
+        self.assertEqual(contract.stack, ["0", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"])
 
     def test_div(self):
-        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a04'_
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~a~a04~2~104'~600%01~_
         # PUSH1 0x0a
         # PUSH1 0x0a
         # DIV
-        contract = Contract(bytecode="600a600a04")
+        # PUSH1 0x02
+        # PUSH1 0x01
+        # DIV
+        contract = Contract(bytecode="600a600a046002600104")
         contract.execute()
-        self.assertEqual(contract.stack, ["1"])
+        self.assertEqual(contract.stack, ["1", "0"])
 
     def test_lt(self):
-        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600910600a600a10'_
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~a~910~a~a10'~600%01~_
         # PUSH1 0x0a
         # PUSH1 0x09
         # LT
@@ -115,7 +127,7 @@ class ContractTestCase(unittest.TestCase):
         self.assertEqual(contract.stack, ["1", "0"])
 
     def test_gt(self):
-        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6009600a11600a600a11'_
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~9~a11~a~a11'~600%01~_
         # PUSH1 0x09
         # PUSH1 0x0a
         # GT
@@ -127,7 +139,7 @@ class ContractTestCase(unittest.TestCase):
         self.assertEqual(contract.stack, ["1", "0"])
 
     def test_eq(self):
-        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a600a146005600a14'_
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~a~a14~5~a14'~600%01~_
         # PUSH1 0x0a
         # PUSH1 0x0a
         # EQ
