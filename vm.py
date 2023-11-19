@@ -103,10 +103,18 @@ class Contract:
             self.program_counter += 1
             return
 
+        # ISZERO
+        elif opcode == "15":
+            a = int(self.stack.pop(), 16)
+            b = "1" if a == 0 else "0"
+            self.stack.append(b)
+            self.program_counter += 1
+            return
+
         # PUSH0
         elif opcode == "5f":
-            self.program_counter += 1
             self.stack.append("0")
+            self.program_counter += 1
             return
 
         # PUSH1 to PUSH32
@@ -130,16 +138,34 @@ class Contract:
             self.stack.append(bytes_num)
             return
 
+        # CODESIZE
+        elif opcode == "38":
+            self.stack.append(hex(len(self.parsed_bytecode))[2:])
+            self.program_counter += 1
+            return
+
         # GASLIMIT
         elif opcode == "45":
-            self.program_counter += 1
             self.stack.append("ffffffffffff")
+            self.program_counter += 1
+            return
+
+        # CHAINID
+        elif opcode == "46":
+            self.stack.append("1")
+            self.program_counter += 1
             return
 
         # BASEFEE
         elif opcode == "48":
-            self.program_counter += 1
             self.stack.append("a")
+            self.program_counter += 1
+            return
+
+        # POP
+        elif opcode == "50":
+            self.stack.pop()
+            self.program_counter += 1
             return
 
         raise Exception(f"OPCODE {opcode} not implemented")

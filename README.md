@@ -23,7 +23,7 @@ An in-progress implementation of the EVM in python.
 | 12   | SLT            |             |
 | 13   | SGT            |             |
 | 14   | EQ             | ✅           |
-| 15   | ISZERO         |             |
+| 15   | ISZERO         | ✅           |
 | 16   | AND            |             |
 | 17   | OR             |             |
 | 18   | XOR            |             |
@@ -41,7 +41,7 @@ An in-progress implementation of the EVM in python.
 | 35   | CALLDATALOAD   |             |
 | 36   | CALLDATASIZE   |             |
 | 37   | CALLDATACOPY   |             |
-| 38   | CODESIZE       |             |
+| 38   | CODESIZE       | ✅           |
 | 39   | CODECOPY       |             |
 | 3A   | GASPRICE       |             |
 | 3B   | EXTCODESIZE    |             |
@@ -55,10 +55,10 @@ An in-progress implementation of the EVM in python.
 | 43   | NUMBER         |             |
 | 44   | PREVRANDAO     |             |
 | 45   | GASLIMIT       | ✅           |
-| 46   | CHAINID        |             |
+| 46   | CHAINID        | ✅           |
 | 47   | SELFBALANCE    |             |
 | 48   | BASEFEE        | ✅           |
-| 50   | POP            |             |
+| 50   | POP            | ✅           |
 | 51   | MLOAD          |             |
 | 52   | MSTORE         |             |
 | 53   | MSTORE8        |             |
