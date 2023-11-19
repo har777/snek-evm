@@ -182,6 +182,15 @@ class Contract:
             self.stack.append(stack_item)
             return
 
+        # SWAP1 to SWAP16
+        elif opcode in {"90", "91", "92", "93", "94", "95", "96", "97",
+                        "98", "99", "9a", "9b", "9c", "9d", "9e", "9f"}:
+            self.program_counter += 1
+            stack_item_a_reverse_index = -1
+            stack_item_b_reverse_index = -(int(opcode, 16) - 142)
+            self.stack[stack_item_a_reverse_index], self.stack[stack_item_b_reverse_index] = self.stack[stack_item_b_reverse_index], self.stack[stack_item_a_reverse_index]
+            return
+
         # CODESIZE
         elif opcode == "38":
             self.stack.append(hex(len(self.parsed_bytecode))[2:])

@@ -114,6 +114,72 @@ class ContractTestCase(unittest.TestCase):
         contract.execute()
         self.assertEqual(contract.stack, ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"])
 
+    def test_swap1(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6002600190'_
+        # PUSH1 0x02
+        # PUSH1 0x01
+        # SWAP1
+        contract = Contract(bytecode="6002600190")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "2"])
+
+    def test_swap2(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='60026000600191'_
+        # PUSH1 0x02
+        # PUSH1 0x00
+        # PUSH1 0x01
+        # SWAP2
+        contract = Contract(bytecode="60026000600191")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "0", "2"])
+
+    def test_swap15(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='z2~~~~~~~z19e'~z0z0z600%01z~_
+        # PUSH1 0x02
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x01
+        # SWAP15
+        contract = Contract(bytecode="60026000600060006000600060006000600060006000600060006000600060019e")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
+
+    def test_swap16(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='z2~~~~~z19f'~z0z0z0z600%01z~_
+        # PUSH1 0x02
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x01
+        # SWAP16
+        contract = Contract(bytecode="600260006000600060006000600060006000600060006000600060006000600060019f")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
+
     def test_codesize(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7cyyyyz5038'~zzz0z00y~~%01yz~_
         # PUSH29 0x0000000000000000000000000000000000000000000000000000000000

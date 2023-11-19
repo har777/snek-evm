@@ -119,22 +119,22 @@ An in-progress implementation of the EVM in python.
 | 8D   | DUP14          | ✅           |
 | 8E   | DUP15          | ✅           |
 | 8F   | DUP16          | ✅           |
-| 90   | SWAP1          |             |
-| 91   | SWAP2          |             |
-| 92   | SWAP3          |             |
-| 93   | SWAP4          |             |
-| 94   | SWAP5          |             |
-| 95   | SWAP6          |             |
-| 96   | SWAP7          |             |
-| 97   | SWAP8          |             |
-| 98   | SWAP9          |             |
-| 99   | SWAP10         |             |
-| 9A   | SWAP11         |             |
-| 9B   | SWAP12         |             |
-| 9C   | SWAP13         |             |
-| 9D   | SWAP14         |             |
-| 9E   | SWAP15         |             |
-| 9F   | SWAP16         |             |
+| 90   | SWAP1          | ✅           |
+| 91   | SWAP2          | ✅           |
+| 92   | SWAP3          | ✅           |
+| 93   | SWAP4          | ✅           |
+| 94   | SWAP5          | ✅           |
+| 95   | SWAP6          | ✅           |
+| 96   | SWAP7          | ✅           |
+| 97   | SWAP8          | ✅           |
+| 98   | SWAP9          | ✅           |
+| 99   | SWAP10         | ✅           |
+| 9A   | SWAP11         | ✅           |
+| 9B   | SWAP12         | ✅           |
+| 9C   | SWAP13         | ✅           |
+| 9D   | SWAP14         | ✅           |
+| 9E   | SWAP15         | ✅           |
+| 9F   | SWAP16         | ✅           |
 | A0   | LOG0           |             |
 | A1   | LOG1           |             |
 | A2   | LOG2           |             |
