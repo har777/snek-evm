@@ -24,10 +24,10 @@ An in-progress implementation of the EVM in python.
 | 13   | SGT            |             |
 | 14   | EQ             | ✅           |
 | 15   | ISZERO         | ✅           |
-| 16   | AND            |             |
-| 17   | OR             |             |
-| 18   | XOR            |             |
-| 19   | NOT            |             |
+| 16   | AND            | ✅           |
+| 17   | OR             | ✅           |
+| 18   | XOR            | ✅           |
+| 19   | NOT            | ✅           |
 | 1A   | BYTE           |             |
 | 1B   | SHL            |             |
 | 1C   | SHR            |             |

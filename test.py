@@ -183,3 +183,62 @@ class ContractTestCase(unittest.TestCase):
         contract = Contract(bytecode="600a15600015")
         contract.execute()
         self.assertEqual(contract.stack, ["0", "1"])
+
+    def test_and(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600f600f16600060ff16'_
+        # PUSH1 0x0f
+        # PUSH1 0x0f
+        # AND
+        # PUSH1 0x00
+        # PUSH1 0xff
+        # AND
+        contract = Contract(bytecode="600f600f16600060ff16")
+        contract.execute()
+        self.assertEqual(contract.stack, ["f", "0"])
+
+    def test_or(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600f60f01760ff60ff17'_
+        # PUSH1 0x0f
+        # PUSH1 0xf0
+        # OR
+        # PUSH1 0xff
+        # PUSH1 0xff
+        # OR
+        contract = Contract(bytecode="600f60f01760ff60ff17")
+        contract.execute()
+        self.assertEqual(contract.stack, ["ff", "ff"])
+
+    def test_xor(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600f60f01860ff60ff18'_
+        # PUSH1 0x0f
+        # PUSH1 0xf0
+        # XOR
+        # PUSH1 0xff
+        # PUSH1 0xff
+        # XOR
+        contract = Contract(bytecode="600f60f01860ff60ff18")
+        contract.execute()
+        self.assertEqual(contract.stack, ["ff", "0"])
+
+    def test_not(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6000196001197yyf197~f00y~z00~19'~zzzffffy~~~~%01yz~_
+        # PUSH1 0x00
+        # NOT
+        # PUSH1 0x01
+        # NOT
+        # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # NOT
+        # PUSH32 0xffffffff00ffffffffffffffffffffffffffffffffffffffffffff00ffffffff
+        # NOT
+        contract = Contract(bytecode="6000196001197fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                                     "ffff197fffffffff00ffffffffffffffffffffffffffffffffffffffffffff00ffffffff19")
+        contract.execute()
+        self.assertEqual(
+            contract.stack,
+            [
+                "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
+                "0",
+                "ff00000000000000000000000000000000000000000000ff00000000"
+            ]
+        )

@@ -111,6 +111,41 @@ class Contract:
             self.program_counter += 1
             return
 
+        # AND
+        elif opcode == "16":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = hex(a & b)[2:]
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # OR
+        elif opcode == "17":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = hex(a | b)[2:]
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # XOR
+        elif opcode == "18":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = hex(a ^ b)[2:]
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # NOT
+        elif opcode == "19":
+            a = int(self.stack.pop(), 16)
+            b = hex(~a & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)[2:]
+            self.stack.append(b)
+            self.program_counter += 1
+            return
+
         # PUSH0
         elif opcode == "5f":
             self.stack.append("0")
