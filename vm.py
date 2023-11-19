@@ -173,6 +173,15 @@ class Contract:
             self.stack.append(bytes_num)
             return
 
+        # DUP1 to DUP16
+        elif opcode in {"80", "81", "82", "83", "84", "85", "86", "87",
+                        "88", "89", "8a", "8b", "8c", "8d", "8e", "8f"}:
+            self.program_counter += 1
+            stack_item_reverse_index = int(opcode, 16) - 127
+            stack_item = self.stack[-stack_item_reverse_index]
+            self.stack.append(stack_item)
+            return
+
         # CODESIZE
         elif opcode == "38":
             self.stack.append(hex(len(self.parsed_bytecode))[2:])

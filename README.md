@@ -103,22 +103,22 @@ An in-progress implementation of the EVM in python.
 | 7D   | PUSH30         | ✅           |
 | 7E   | PUSH31         | ✅           |
 | 7F   | PUSH32         | ✅           |
-| 80   | DUP1           |             |
-| 81   | DUP2           |             |
-| 82   | DUP3           |             |
-| 83   | DUP4           |             |
-| 84   | DUP5           |             |
-| 85   | DUP6           |             |
-| 86   | DUP7           |             |
-| 87   | DUP8           |             |
-| 88   | DUP9           |             |
-| 89   | DUP10          |             |
-| 8A   | DUP11          |             |
-| 8B   | DUP12          |             |
-| 8C   | DUP13          |             |
-| 8D   | DUP14          |             |
-| 8E   | DUP15          |             |
-| 8F   | DUP16          |             |
+| 80   | DUP1           | ✅           |
+| 81   | DUP2           | ✅           |
+| 82   | DUP3           | ✅           |
+| 83   | DUP4           | ✅           |
+| 84   | DUP5           | ✅           |
+| 85   | DUP6           | ✅           |
+| 86   | DUP7           | ✅           |
+| 87   | DUP8           | ✅           |
+| 88   | DUP9           | ✅           |
+| 89   | DUP10          | ✅           |
+| 8A   | DUP11          | ✅           |
+| 8B   | DUP12          | ✅           |
+| 8C   | DUP13          | ✅           |
+| 8D   | DUP14          | ✅           |
+| 8E   | DUP15          | ✅           |
+| 8F   | DUP16          | ✅           |
 | 90   | SWAP1          |             |
 | 91   | SWAP2          |             |
 | 92   | SWAP3          |             |
