@@ -1,3 +1,5 @@
+import math
+
 from collections import deque
 
 
@@ -15,6 +17,8 @@ class Contract:
 
         self.stack = []
 
+        self.memory = []
+
         self.storage = {}
 
         self.stopped = False
@@ -24,6 +28,7 @@ class Contract:
         print(f"parsed_bytecode: {self.parsed_bytecode}")
         print(f"program_counter: {self.program_counter}")
         print(f"stack: {self.stack}")
+        print(f"memory: {self.memory}")
         print(f"storage: {self.storage}")
         print(f"stopped: {self.stopped}")
 
@@ -146,6 +151,68 @@ class Contract:
             a = int(self.stack.pop(), 16)
             b = hex(~a & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)[2:]
             self.stack.append(b)
+            self.program_counter += 1
+            return
+
+        # MLOAD
+        elif opcode == "51":
+            offset = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + 32) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            byte_array = []
+            for idx in range(32):
+                byte = self.memory[idx + offset]
+                byte_array.append(byte)
+
+            word = hex(int("".join(byte_array), 16))[2:]
+            self.stack.append(word)
+
+            self.program_counter += 1
+            return
+
+        # MSTORE
+        elif opcode == "52":
+            offset = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + 32) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            value = self.stack.pop()
+            value = value.rjust(64, "0")
+            value = [value[idx:idx+2] for idx in range(0, len(value), 2)]
+
+            for idx in range(32):
+                self.memory[idx + offset] = value[idx]
+
+            self.program_counter += 1
+            return
+
+        # MSTORE8
+        elif opcode == "53":
+            offset = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + 1) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            value = self.stack.pop()
+            value = value.rjust(64, "0")
+            value = [value[idx:idx+2] for idx in range(0, len(value), 2)]
+
+            self.memory[offset] = value[-1]
+
+            self.program_counter += 1
+            return
+
+        # MSIZE
+        elif opcode == "59":
+            memory_size = hex(len(self.memory))[2:]
+            self.stack.append(memory_size)
+
             self.program_counter += 1
             return
 

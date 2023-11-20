@@ -405,3 +405,59 @@ class ContractTestCase(unittest.TestCase):
         contract.execute()
         self.assertEqual(contract.stack, [])
         self.assertEqual(contract.storage, {"0": "ffff", "2305": "ff"})
+
+    def test_mstore(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~052~152'~60ff600%01~_
+        # PUSH1 0xff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0xff
+        # PUSH1 0x01
+        # MSTORE
+        contract = Contract(bytecode="60ff60005260ff600152")
+        contract.execute()
+        self.assertEqual(contract.stack, [])
+        self.assertEqual("".join(contract.memory), "0000000000000000000000000000000000000000000000000000000000000000ff00000000000000000000000000000000000000000000000000000000000000")
+
+    def test_mstore8(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='61ffee60005360ff600153'_
+        # PUSH2 0xffee
+        # PUSH1 0x00
+        # MSTORE8
+        # PUSH1 0xff
+        # PUSH1 0x01
+        # MSTORE8
+        contract = Contract(bytecode="61ffee60005360ff600153")
+        contract.execute()
+        self.assertEqual(contract.stack, [])
+        self.assertEqual("".join(contract.memory), "eeff000000000000000000000000000000000000000000000000000000000000")
+
+    def test_mload(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7fyyyyyzff6z0526z0516z151'~zzzz00y~~%01yz~_
+        # PUSH32 0x00000000000000000000000000000000000000000000000000000000000000ff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x00
+        # MLOAD
+        # PUSH1 0x01
+        # MLOAD
+        contract = Contract(bytecode="7f00000000000000000000000000000000000000000000000000000000000000ff600052600051600151")
+        contract.execute()
+        self.assertEqual(contract.stack, ["ff", "ff00"])
+        self.assertEqual("".join(contract.memory), "00000000000000000000000000000000000000000000000000000000000000ff0000000000000000000000000000000000000000000000000000000000000000")
+
+    def test_msize(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='5960005150596039515059'_
+        # MSIZE
+        # PUSH1 0x00
+        # MLOAD
+        # POP
+        # MSIZE
+        # PUSH1 0x39
+        # MLOAD
+        # POP
+        # MSIZE
+        contract = Contract(bytecode="5960005150596039515059")
+        contract.execute()
+        self.assertEqual(contract.stack, ["0", "20", "60"])
+        self.assertEqual("".join(contract.memory), "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
