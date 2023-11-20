@@ -62,8 +62,8 @@ An in-progress implementation of the EVM in python.
 | 51   | MLOAD          |             |
 | 52   | MSTORE         |             |
 | 53   | MSTORE8        |             |
-| 54   | SLOAD          |             |
-| 55   | SSTORE         |             |
+| 54   | SLOAD          | ✅           |
+| 55   | SSTORE         | ✅           |
 | 56   | JUMP           |             |
 | 57   | JUMPI          |             |
 | 58   | PC             |             |

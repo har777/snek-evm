@@ -15,6 +15,8 @@ class Contract:
 
         self.stack = []
 
+        self.storage = {}
+
         self.stopped = False
 
     def debug(self):
@@ -22,6 +24,7 @@ class Contract:
         print(f"parsed_bytecode: {self.parsed_bytecode}")
         print(f"program_counter: {self.program_counter}")
         print(f"stack: {self.stack}")
+        print(f"storage: {self.storage}")
         print(f"stopped: {self.stopped}")
 
     def step(self):
@@ -143,6 +146,22 @@ class Contract:
             a = int(self.stack.pop(), 16)
             b = hex(~a & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)[2:]
             self.stack.append(b)
+            self.program_counter += 1
+            return
+
+        # SLOAD
+        elif opcode == "54":
+            key = self.stack.pop()
+            value = self.storage.get(key, "0")
+            self.stack.append(value)
+            self.program_counter += 1
+            return
+
+        # SSTORE
+        elif opcode == "55":
+            key = self.stack.pop()
+            value = self.stack.pop()
+            self.storage[key] = value
             self.program_counter += 1
             return
 
