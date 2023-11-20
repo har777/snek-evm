@@ -379,6 +379,21 @@ class ContractTestCase(unittest.TestCase):
             ]
         )
 
+    def test_byte(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='60ff601f1a61ff00601e1a60ff60201a'_
+        # PUSH1 0xff
+        # PUSH1 0x1f
+        # BYTE
+        # PUSH2 0xff00
+        # PUSH1 0x1e
+        # BYTE
+        # PUSH1 0xff
+        # PUSH1 0x20
+        # BYTE
+        contract = Contract(bytecode="60ff601f1a61ff00601e1a60ff60201a")
+        contract.execute()
+        self.assertEqual(contract.stack, ["ff", "ff", "0"])
+
     def test_sload(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='602e600055600054600154'_
         # PUSH1 0x2e

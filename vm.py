@@ -154,6 +154,22 @@ class Contract:
             self.program_counter += 1
             return
 
+        # BYTE
+        elif opcode == "1a":
+            offset = int(self.stack.pop(), 16)
+
+            value = self.stack.pop().rjust(64, "0")
+            value_byte_array = [value[idx:idx+2] for idx in range(0, len(value), 2)]
+            try:
+                byte = value_byte_array[offset]
+            except IndexError:
+                byte = "0"
+
+            self.stack.append(byte)
+
+            self.program_counter += 1
+            return
+
         # MLOAD
         elif opcode == "51":
             offset = int(self.stack.pop(), 16)
@@ -162,12 +178,12 @@ class Contract:
             if min_required_memory_size > len(self.memory):
                 self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
 
-            byte_array = []
+            word_byte_array = []
             for idx in range(32):
                 byte = self.memory[idx + offset]
-                byte_array.append(byte)
+                word_byte_array.append(byte)
 
-            word = hex(int("".join(byte_array), 16))[2:]
+            word = hex(int("".join(word_byte_array), 16))[2:]
             self.stack.append(word)
 
             self.program_counter += 1
@@ -183,10 +199,10 @@ class Contract:
 
             value = self.stack.pop()
             value = value.rjust(64, "0")
-            value = [value[idx:idx+2] for idx in range(0, len(value), 2)]
+            value_byte_array = [value[idx:idx+2] for idx in range(0, len(value), 2)]
 
             for idx in range(32):
-                self.memory[idx + offset] = value[idx]
+                self.memory[idx + offset] = value_byte_array[idx]
 
             self.program_counter += 1
             return
@@ -201,9 +217,9 @@ class Contract:
 
             value = self.stack.pop()
             value = value.rjust(64, "0")
-            value = [value[idx:idx+2] for idx in range(0, len(value), 2)]
+            value_byte_array = [value[idx:idx+2] for idx in range(0, len(value), 2)]
 
-            self.memory[offset] = value[-1]
+            self.memory[offset] = value_byte_array[-1]
 
             self.program_counter += 1
             return
