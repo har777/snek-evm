@@ -79,7 +79,10 @@ class Contract:
         elif opcode == "04":
             a = int(self.stack.pop(), 16)
             b = int(self.stack.pop(), 16)
-            c = hex(a // b)[2:]
+            if b == 0:
+                c = 0
+            else:
+                c = hex(a // b)[2:]
             self.stack.append(c)
             self.program_counter += 1
             return
