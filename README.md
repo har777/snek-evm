@@ -29,8 +29,8 @@ An in-progress implementation of the EVM in python.
 | 18   | XOR            | ✅           |
 | 19   | NOT            | ✅           |
 | 1A   | BYTE           | ✅           |
-| 1B   | SHL            |             |
-| 1C   | SHR            |             |
+| 1B   | SHL            | ✅           |
+| 1C   | SHR            | ✅           |
 | 1D   | SAR            |             |
 | 20   | KECCAK256      |             |
 | 30   | ADDRESS        |             |

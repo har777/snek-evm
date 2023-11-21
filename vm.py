@@ -173,6 +173,28 @@ class Contract:
             self.program_counter += 1
             return
 
+        # SHL
+        elif opcode == "1b":
+            shift = int(self.stack.pop(), 16)
+            value = int(self.stack.pop(), 16)
+
+            shifted_value = hex((value << shift) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)[2:]
+            self.stack.append(shifted_value)
+
+            self.program_counter += 1
+            return
+
+        # SHR
+        elif opcode == "1c":
+            shift = int(self.stack.pop(), 16)
+            value = int(self.stack.pop(), 16)
+
+            shifted_value = hex((value >> shift) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)[2:]
+            self.stack.append(shifted_value)
+
+            self.program_counter += 1
+            return
+
         # MLOAD
         elif opcode == "51":
             offset = int(self.stack.pop(), 16)

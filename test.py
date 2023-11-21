@@ -394,6 +394,30 @@ class ContractTestCase(unittest.TestCase):
         contract.execute()
         self.assertEqual(contract.stack, ["ff", "ff", "0"])
 
+    def test_shl(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6z16z11b7fffyyyyyz6z41b'~zzzz00y~~%01yz~_
+        # PUSH1 0x01
+        # PUSH1 0x01
+        # SHL
+        # PUSH32 0xff00000000000000000000000000000000000000000000000000000000000000
+        # PUSH1 0x04
+        # SHL
+        contract = Contract(bytecode="600160011b7fff0000000000000000000000000000000000000000000000000000000000000060041b")
+        contract.execute()
+        self.assertEqual(contract.stack, ["2", "f000000000000000000000000000000000000000000000000000000000000000"])
+
+    def test_shr(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600260011c60ff60041c'_
+        # PUSH1 0x02
+        # PUSH1 0x01
+        # SHR
+        # PUSH1 0xff
+        # PUSH1 0x04
+        # SHR
+        contract = Contract(bytecode="600260011c60ff60041c")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "f"])
+
     def test_sload(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='602e600055600054600154'_
         # PUSH1 0x2e
