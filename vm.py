@@ -227,14 +227,6 @@ class Contract:
             self.program_counter += 1
             return
 
-        # MSIZE
-        elif opcode == "59":
-            memory_size = hex(len(self.memory))[2:]
-            self.stack.append(memory_size)
-
-            self.program_counter += 1
-            return
-
         # SLOAD
         elif opcode == "54":
             key = self.stack.pop()
@@ -248,6 +240,51 @@ class Contract:
             key = self.stack.pop()
             value = self.stack.pop()
             self.storage[key] = value
+            self.program_counter += 1
+            return
+
+        # JUMP
+        elif opcode == "56":
+            new_program_counter = int(self.stack.pop(), 16)
+            if self.parsed_bytecode[new_program_counter] != "5b":
+                print("invalid JUMP")
+                self.stopped = True
+            else:
+                self.program_counter = new_program_counter
+            return
+
+        # JUMPI
+        elif opcode == "57":
+            new_program_counter = int(self.stack.pop(), 16)
+            condition = int(self.stack.pop(), 16)
+
+            if condition != 0:
+                if self.parsed_bytecode[new_program_counter] != "5b":
+                    print("invalid JUMP")
+                    self.stopped = True
+                else:
+                    self.program_counter = new_program_counter
+            else:
+                self.program_counter += 1
+            return
+
+        # JUMPDEST
+        elif opcode == "5b":
+            self.program_counter += 1
+            return
+
+        # PC
+        elif opcode == "58":
+            self.stack.append(str(self.program_counter))
+
+            self.program_counter += 1
+            return
+
+        # MSIZE
+        elif opcode == "59":
+            memory_size = hex(len(self.memory))[2:]
+            self.stack.append(memory_size)
+
             self.program_counter += 1
             return
 
@@ -326,7 +363,10 @@ class Contract:
             self.program_counter += 1
             return
 
-        raise Exception(f"OPCODE {opcode} not implemented")
+        else:
+            print(f"OPCODE {opcode} not implemented")
+            self.stopped = True
+            return
 
     def execute(self):
         while not self.stopped:

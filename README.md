@@ -64,12 +64,12 @@ An in-progress implementation of the EVM in python.
 | 53   | MSTORE8        | ✅           |
 | 54   | SLOAD          | ✅           |
 | 55   | SSTORE         | ✅           |
-| 56   | JUMP           |             |
-| 57   | JUMPI          |             |
-| 58   | PC             |             |
+| 56   | JUMP           | ✅           |
+| 57   | JUMPI          | ✅           |
+| 58   | PC             | ✅           |
 | 59   | MSIZE          | ✅           |
 | 5A   | GAS            |             |
-| 5B   | JUMPDEST       |             |
+| 5B   | JUMPDEST       | ✅           |
 | 5F   | PUSH0          | ✅           |
 | 60   | PUSH1          | ✅           |
 | 61   | PUSH2          | ✅           |

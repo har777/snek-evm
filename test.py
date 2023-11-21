@@ -476,3 +476,50 @@ class ContractTestCase(unittest.TestCase):
         contract.execute()
         self.assertEqual(contract.stack, ["0", "20", "60"])
         self.assertEqual("".join(contract.memory), "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+
+    def test_jumpdest(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='5b5b'_
+        # JUMPDEST
+        # JUMPDEST
+        contract = Contract(bytecode="5b5b")
+        contract.execute()
+        self.assertEqual(contract.stack, [])
+
+    def test_jump(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600456fe5b6001'_
+        # PUSH1 0x04
+        # JUMP
+        # INVALID
+        # JUMPDEST
+        # PUSH1 0x01
+        contract = Contract(bytecode="600456fe5b6001")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1"])
+
+    def test_jumpi(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~0~a57~1~c575bfe5b~1'~600%01~_
+        # PUSH1 0x00
+        # PUSH1 0x0a
+        # JUMPI
+        # PUSH1 0x01
+        # PUSH1 0x0c
+        # JUMPI
+        # JUMPDEST
+        # INVALID
+        # JUMPDEST
+        # PUSH1 0x01
+        contract = Contract(bytecode="6000600a576001600c575bfe5b6001")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1"])
+
+    def test_pc(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='58585b58600158'_
+        # PC
+        # PC
+        # JUMPDEST
+        # PC
+        # PUSH1 0x01
+        # PC
+        contract = Contract(bytecode="58585b58600158")
+        contract.execute()
+        self.assertEqual(contract.stack, ["0", "1", "3", "1", "6"])
