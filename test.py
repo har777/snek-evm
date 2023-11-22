@@ -648,3 +648,91 @@ class ContractTestCase(unittest.TestCase):
         contract.execute(transaction={"data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"})
         self.assertEqual(contract.stack, [])
         self.assertEqual("".join(contract.memory), "ff00000000000000ffffffffffffffffffffffffffffffffffffffffffffffff")
+
+    def test_log0(self):
+        # PUSH1 0xff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # LOG0
+        contract = Contract(bytecode="60ff60005260206000a0")
+        contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual(contract.logs, [{"data": "0xff"}])
+
+    def test_log1(self):
+        # PUSH1 0xff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # LOG1
+        contract = Contract(bytecode="60ff6000527fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a1")
+        contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual(contract.logs, [{
+            "data": "0xff",
+            "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+        }])
+
+    def test_log2(self):
+        # PUSH1 0xff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0xbae7ebe87fc708426a193f49c4829cdc6221ac84
+        # PUSH32 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # LOG2
+        contract = Contract(bytecode="60ff6000527f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a2")
+        contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual(contract.logs, [{
+            "data": "0xff",
+            "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            "topic1": "0xbae7ebe87fc708426a193f49c4829cdc6221ac84",
+        }])
+
+    def test_log3(self):
+        # PUSH1 0xff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0x4f6742badb049791cd9a37ea913f2bac38d01279
+        # PUSH32 0xbae7ebe87fc708426a193f49c4829cdc6221ac84
+        # PUSH32 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # LOG3
+        contract = Contract(bytecode="60ff6000527f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a3")
+        contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual(contract.logs, [{
+            "data": "0xff",
+            "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            "topic1": "0xbae7ebe87fc708426a193f49c4829cdc6221ac84",
+            "topic2": "0x4f6742badb049791cd9a37ea913f2bac38d01279",
+        }])
+
+    def test_log4(self):
+        # PUSH1 0xff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH16 0x2ccc2087078963d621f42338ab0
+        # PUSH32 0x4f6742badb049791cd9a37ea913f2bac38d01279
+        # PUSH32 0xbae7ebe87fc708426a193f49c4829cdc6221ac84
+        # PUSH32 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # LOG4
+        contract = Contract(bytecode="60ff6000526f000002ccc2087078963d621f42338ab07f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a4")
+        contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual(contract.logs, [{
+            "data": "0xff",
+            "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            "topic1": "0xbae7ebe87fc708426a193f49c4829cdc6221ac84",
+            "topic2": "0x4f6742badb049791cd9a37ea913f2bac38d01279",
+            "topic3": "0x2ccc2087078963d621f42338ab0",
+        }])

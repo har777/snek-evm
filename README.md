@@ -135,11 +135,11 @@ An in-progress implementation of the EVM in python.
 | 9D   | SWAP14         | ✅           |
 | 9E   | SWAP15         | ✅           |
 | 9F   | SWAP16         | ✅           |
-| A0   | LOG0           |             |
-| A1   | LOG1           |             |
-| A2   | LOG2           |             |
-| A3   | LOG3           |             |
-| A4   | LOG4           |             |
+| A0   | LOG0           | ✅           |
+| A1   | LOG1           | ✅           |
+| A2   | LOG2           | ✅           |
+| A3   | LOG3           | ✅           |
+| A4   | LOG4           | ✅           |
 | F0   | CREATE         |             |
 | F1   | CALL           |             |
 | F2   | CALLCODE       |             |
