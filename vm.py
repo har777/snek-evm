@@ -466,10 +466,15 @@ class Contract:
             self.stack[stack_item_a_reverse_index], self.stack[stack_item_b_reverse_index] = self.stack[stack_item_b_reverse_index], self.stack[stack_item_a_reverse_index]
             return
 
-        # LOG0
-        elif opcode == "a0":
+        # LOG0 to LOG4
+        elif opcode in {"a0", "a1", "a2", "a3", "a4"}:
             offset = int(self.stack.pop(), 16)
             size = int(self.stack.pop(), 16)
+
+            topics = {}
+            num_of_topics = int(opcode[-1])
+            for topic_num in range(num_of_topics):
+                topics[f"topic{topic_num}"] = hex(int(self.stack.pop(), 16))
 
             min_required_memory_size = math.ceil((offset + size) / 32) * 32
             if min_required_memory_size > len(self.memory):
@@ -479,104 +484,10 @@ class Contract:
             for idx in range(size):
                 byte = self.memory[idx + offset]
                 data_byte_array.append(byte)
-
             data = hex(int("".join(data_byte_array), 16))
 
-            self.logs.append({"data": data})
-
-            self.program_counter += 1
-            return
-
-        # LOG1
-        elif opcode == "a1":
-            offset = int(self.stack.pop(), 16)
-            size = int(self.stack.pop(), 16)
-            topic0 = hex(int(self.stack.pop(), 16))
-
-            min_required_memory_size = math.ceil((offset + size) / 32) * 32
-            if min_required_memory_size > len(self.memory):
-                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
-
-            data_byte_array = []
-            for idx in range(size):
-                byte = self.memory[idx + offset]
-                data_byte_array.append(byte)
-
-            data = hex(int("".join(data_byte_array), 16))
-
-            self.logs.append({"data": data, "topic0": topic0})
-
-            self.program_counter += 1
-            return
-
-        # LOG2
-        elif opcode == "a2":
-            offset = int(self.stack.pop(), 16)
-            size = int(self.stack.pop(), 16)
-            topic0 = hex(int(self.stack.pop(), 16))
-            topic1 = hex(int(self.stack.pop(), 16))
-
-            min_required_memory_size = math.ceil((offset + size) / 32) * 32
-            if min_required_memory_size > len(self.memory):
-                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
-
-            data_byte_array = []
-            for idx in range(size):
-                byte = self.memory[idx + offset]
-                data_byte_array.append(byte)
-
-            data = hex(int("".join(data_byte_array), 16))
-
-            self.logs.append({"data": data, "topic0": topic0, "topic1": topic1})
-
-            self.program_counter += 1
-            return
-
-        # LOG3
-        elif opcode == "a3":
-            offset = int(self.stack.pop(), 16)
-            size = int(self.stack.pop(), 16)
-            topic0 = hex(int(self.stack.pop(), 16))
-            topic1 = hex(int(self.stack.pop(), 16))
-            topic2 = hex(int(self.stack.pop(), 16))
-
-            min_required_memory_size = math.ceil((offset + size) / 32) * 32
-            if min_required_memory_size > len(self.memory):
-                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
-
-            data_byte_array = []
-            for idx in range(size):
-                byte = self.memory[idx + offset]
-                data_byte_array.append(byte)
-
-            data = hex(int("".join(data_byte_array), 16))
-
-            self.logs.append({"data": data, "topic0": topic0, "topic1": topic1, "topic2": topic2})
-
-            self.program_counter += 1
-            return
-
-        # LOG4
-        elif opcode == "a4":
-            offset = int(self.stack.pop(), 16)
-            size = int(self.stack.pop(), 16)
-            topic0 = hex(int(self.stack.pop(), 16))
-            topic1 = hex(int(self.stack.pop(), 16))
-            topic2 = hex(int(self.stack.pop(), 16))
-            topic3 = hex(int(self.stack.pop(), 16))
-
-            min_required_memory_size = math.ceil((offset + size) / 32) * 32
-            if min_required_memory_size > len(self.memory):
-                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
-
-            data_byte_array = []
-            for idx in range(size):
-                byte = self.memory[idx + offset]
-                data_byte_array.append(byte)
-
-            data = hex(int("".join(data_byte_array), 16))
-
-            self.logs.append({"data": data, "topic0": topic0, "topic1": topic1, "topic2": topic2, "topic3": topic3})
+            log = {"data": data, **topics}
+            self.logs.append(log)
 
             self.program_counter += 1
             return

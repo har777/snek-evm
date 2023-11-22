@@ -723,14 +723,14 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0x4f6742badb049791cd9a37ea913f2bac38d01279
         # PUSH32 0xbae7ebe87fc708426a193f49c4829cdc6221ac84
         # PUSH32 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
-        # PUSH1 0x20
+        # PUSH1 0x3c
         # PUSH1 0x00
         # LOG4
-        contract = Contract(bytecode="60ff6000526f000002ccc2087078963d621f42338ab07f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a4")
+        contract = Contract(bytecode="60ff6000526f000002ccc2087078963d621f42338ab07f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef603c6000a4")
         contract.execute(transaction={})
         self.assertEqual(contract.stack, [])
         self.assertEqual(contract.logs, [{
-            "data": "0xff",
+            "data": "0xff00000000000000000000000000000000000000000000000000000000",
             "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
             "topic1": "0xbae7ebe87fc708426a193f49c4829cdc6221ac84",
             "topic2": "0x4f6742badb049791cd9a37ea913f2bac38d01279",
