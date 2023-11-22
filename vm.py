@@ -12,6 +12,8 @@ class Contract:
         # split into array of 2 characters
         self.parsed_bytecode = [bytecode[i:i+2] for i in range(0, len(bytecode), 2)]
 
+        self.transaction = {}
+
         # pointer used to decide what opcode to step into next
         self.program_counter = 0
 
@@ -26,6 +28,7 @@ class Contract:
     def debug(self):
         print(f"bytecode: {''.join(self.parsed_bytecode)}")
         print(f"parsed_bytecode: {self.parsed_bytecode}")
+        print(f"transaction: {self.transaction}")
         print(f"program_counter: {self.program_counter}")
         print(f"stack: {self.stack}")
         print(f"memory: {self.memory}")
@@ -235,6 +238,68 @@ class Contract:
 
             shifted_value = hex((value >> shift) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)[2:]
             self.stack.append(shifted_value)
+
+            self.program_counter += 1
+            return
+
+        # CALLVALUE
+        elif opcode == "34":
+            call_value = hex(int(self.transaction["value"]))[2:]
+            self.stack.append(call_value)
+            self.program_counter += 1
+            return
+
+        # CALLDATALOAD
+        elif opcode == "35":
+            offset = int(self.stack.pop(), 16)
+
+            calldata = self.transaction.get("data", "0x")[2:]
+            parsed_calldata = [calldata[i:i + 2] for i in range(0, len(calldata), 2)]
+
+            bytes_list = []
+            for idx in range(32):
+                try:
+                    byte = parsed_calldata[idx + offset]
+                except IndexError:
+                    byte = "00"
+                bytes_list.append(byte)
+
+            load_bytes = hex(int("".join(bytes_list), 16))[2:]
+            self.stack.append(load_bytes)
+
+            self.program_counter += 1
+            return
+
+        # CALLDATASIZE
+        elif opcode == "36":
+            calldata = self.transaction.get("data", "0x")[2:]
+            parsed_calldata = [calldata[i:i + 2] for i in range(0, len(calldata), 2)]
+            calldata_size = hex(len(parsed_calldata))[2:]
+
+            self.stack.append(calldata_size)
+
+            self.program_counter += 1
+            return
+
+        # CALLDATACOPY
+        elif opcode == "37":
+            memory_offset = int(self.stack.pop(), 16)
+            calldata_offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            calldata = self.transaction.get("data", "0x")[2:]
+            parsed_calldata = [calldata[i:i + 2] for i in range(0, len(calldata), 2)]
+
+            min_required_memory_size = math.ceil((memory_offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            for idx in range(size):
+                try:
+                    byte = parsed_calldata[idx + calldata_offset]
+                except IndexError:
+                    byte = "00"
+                self.memory[idx + memory_offset] = byte
 
             self.program_counter += 1
             return
@@ -454,6 +519,15 @@ class Contract:
             self.stopped = True
             return
 
-    def execute(self):
+    def execute(self, transaction):
+        # calldata has to be even length if present
+        if len(transaction.get("data", "0x")) % 2 != 0:
+            raise Exception("Invalid calldata length")
+
+        self.transaction = transaction
+
+        self.stack = []
+        self.memory = []
+
         while not self.stopped:
             self.step()

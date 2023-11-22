@@ -37,10 +37,10 @@ An in-progress implementation of the EVM in python.
 | 31   | BALANCE        |             |
 | 32   | ORIGIN         |             |
 | 33   | CALLER         |             |
-| 34   | CALLVALUE      |             |
-| 35   | CALLDATALOAD   |             |
-| 36   | CALLDATASIZE   |             |
-| 37   | CALLDATACOPY   |             |
+| 34   | CALLVALUE      | ✅           |
+| 35   | CALLDATALOAD   | ✅           |
+| 36   | CALLDATASIZE   | ✅           |
+| 37   | CALLDATACOPY   | ✅           |
 | 38   | CODESIZE       | ✅           |
 | 39   | CODECOPY       | ✅           |
 | 3A   | GASPRICE       |             |

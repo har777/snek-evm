@@ -10,7 +10,7 @@ class ContractTestCase(unittest.TestCase):
         # STOP
         # PUSH1 0x0a
         contract = Contract(bytecode="600a00600a")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["a"])
 
     def test_push0(self):
@@ -18,7 +18,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH0
         # PUSH0
         contract = Contract(bytecode="5f5f")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["0", "0"])
 
     def test_push1(self):
@@ -26,7 +26,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0x00
         contract = Contract(bytecode="60ff6000")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ff", "0"])
 
     def test_push31(self):
@@ -35,14 +35,14 @@ class ContractTestCase(unittest.TestCase):
         # PUSH31 0x00000000000000000000000000000000000000000000000000000000000000
         contract = Contract(
             bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e00000000000000000000000000000000000000000000000000000000000000")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "0"])
 
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7ezzzzz7e7e0a'~ffffffz~~%01z~_
         # PUSH31 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e
         # PUSH31 0x0a
         contract = Contract(bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e7e0a")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e", "a"])
 
     def test_push32(self):
@@ -51,7 +51,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0x0000000000000000000000000000000000000000000000000000000000000000
         contract = Contract(
             bytecode="7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "0"])
 
     def test_dup1(self):
@@ -59,7 +59,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # DUP1
         contract = Contract(bytecode="600180")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "1"])
 
     def test_dup2(self):
@@ -68,7 +68,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # DUP2
         contract = Contract(bytecode="6001600081")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "0", "1"])
 
     def test_dup15(self):
@@ -90,7 +90,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # DUP15
         contract = Contract(bytecode="6001600060006000600060006000600060006000600060006000600060008e")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"])
 
@@ -114,7 +114,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # DUP16
         contract = Contract(bytecode="60016000600060006000600060006000600060006000600060006000600060008f")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"])
 
@@ -124,7 +124,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP1
         contract = Contract(bytecode="6002600190")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "2"])
 
     def test_swap2(self):
@@ -134,7 +134,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP2
         contract = Contract(bytecode="60026000600191")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "0", "2"])
 
     def test_swap15(self):
@@ -157,7 +157,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP15
         contract = Contract(bytecode="60026000600060006000600060006000600060006000600060006000600060019e")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
 
@@ -182,7 +182,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP16
         contract = Contract(bytecode="600260006000600060006000600060006000600060006000600060006000600060019f")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
 
@@ -192,7 +192,7 @@ class ContractTestCase(unittest.TestCase):
         # POP
         # CODESIZE
         contract = Contract(bytecode="7c00000000000000000000000000000000000000000000000000000000005038")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["20"])
 
     def test_codecopy(self):
@@ -210,7 +210,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # CODECOPY
         contract = Contract(bytecode="7dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000005050602060006000396008601f600039")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, [])
         self.assertEqual("".join(contract.memory), "7f00000000000000ffffffffffffffffffffffffffffffffffffffffffffff7f")
 
@@ -218,21 +218,21 @@ class ContractTestCase(unittest.TestCase):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
         # GASLIMIT
         contract = Contract(bytecode="45")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ffffffffffff"])
 
     def test_chainid(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='46'_
         # CHAINID
         contract = Contract(bytecode="46")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1"])
 
     def test_basefee(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='48'_
         # BASEFEE
         contract = Contract(bytecode="48")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["a"])
 
     def test_pop(self):
@@ -240,7 +240,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH3 0x01ec21
         # POP
         contract = Contract(bytecode="6201ec2150")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, [])
 
     def test_add(self):
@@ -253,7 +253,7 @@ class ContractTestCase(unittest.TestCase):
         # ADD
         contract = Contract(
             bytecode="600a600a017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600101")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["14", "0"])
 
     def test_mul(self):
@@ -266,7 +266,7 @@ class ContractTestCase(unittest.TestCase):
         # MUL
         contract = Contract(
             bytecode="600a600a027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600202")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["64", "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"])
 
     def test_sub(self):
@@ -278,7 +278,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # SUB
         contract = Contract(bytecode="600a600a036001600003")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["0", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"])
 
     def test_div(self):
@@ -290,7 +290,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # DIV
         contract = Contract(bytecode="600a600a046002600104")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "0"])
 
     def test_mod(self):
@@ -302,7 +302,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x11
         # MOD
         contract = Contract(bytecode="6003600a066005601106")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "2"])
 
     def test_addmod(self):
@@ -316,7 +316,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # ADDMOD
         contract = Contract(bytecode="6008600a600a08600260027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff08")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["4", "1"])
 
     def test_mulmod(self):
@@ -330,7 +330,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # MULMOD
         contract = Contract(bytecode="6008600a600a09600c7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff09")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["4", "9"])
 
     def test_lt(self):
@@ -342,7 +342,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # LT
         contract = Contract(bytecode="600a600910600a600a10")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "0"])
 
     def test_gt(self):
@@ -354,7 +354,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # GT
         contract = Contract(bytecode="6009600a11600a600a11")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "0"])
 
     def test_eq(self):
@@ -366,7 +366,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # EQ
         contract = Contract(bytecode="600a600a146005600a14")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "0"])
 
     def test_iszero(self):
@@ -376,7 +376,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # ISZERO
         contract = Contract(bytecode="600a15600015")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["0", "1"])
 
     def test_and(self):
@@ -388,7 +388,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # AND
         contract = Contract(bytecode="600f600f16600060ff16")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["f", "0"])
 
     def test_or(self):
@@ -400,7 +400,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # OR
         contract = Contract(bytecode="600f60f01760ff60ff17")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ff", "ff"])
 
     def test_xor(self):
@@ -412,7 +412,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # XOR
         contract = Contract(bytecode="600f60f01860ff60ff18")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ff", "0"])
 
     def test_not(self):
@@ -427,7 +427,7 @@ class ContractTestCase(unittest.TestCase):
         # NOT
         contract = Contract(bytecode="6000196001197fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                                      "ffff197fffffffff00ffffffffffffffffffffffffffffffffffffffffffff00ffffffff19")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(
             contract.stack,
             [
@@ -450,7 +450,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x20
         # BYTE
         contract = Contract(bytecode="60ff601f1a61ff00601e1a60ff60201a")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ff", "ff", "0"])
 
     def test_shl(self):
@@ -462,7 +462,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x04
         # SHL
         contract = Contract(bytecode="600160011b7fff0000000000000000000000000000000000000000000000000000000000000060041b")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["2", "f000000000000000000000000000000000000000000000000000000000000000"])
 
     def test_shr(self):
@@ -474,7 +474,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x04
         # SHR
         contract = Contract(bytecode="600260011c60ff60041c")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1", "f"])
 
     def test_sload(self):
@@ -487,7 +487,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SLOAD
         contract = Contract(bytecode="602e600055600054600154")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["2e", "0"])
         self.assertEqual(contract.storage, {"0": "2e"})
 
@@ -500,7 +500,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH2 0x2305
         # SSTORE
         contract = Contract(bytecode="61ffff6000556100ff61230555")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, [])
         self.assertEqual(contract.storage, {"0": "ffff", "2305": "ff"})
 
@@ -513,7 +513,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # MSTORE
         contract = Contract(bytecode="60ff60005260ff600152")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, [])
         self.assertEqual("".join(contract.memory), "0000000000000000000000000000000000000000000000000000000000000000ff00000000000000000000000000000000000000000000000000000000000000")
 
@@ -526,7 +526,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # MSTORE8
         contract = Contract(bytecode="61ffee60005360ff600153")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, [])
         self.assertEqual("".join(contract.memory), "eeff000000000000000000000000000000000000000000000000000000000000")
 
@@ -540,7 +540,7 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # MLOAD
         contract = Contract(bytecode="7f00000000000000000000000000000000000000000000000000000000000000ff600052600051600151")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["ff", "ff00"])
         self.assertEqual("".join(contract.memory), "00000000000000000000000000000000000000000000000000000000000000ff0000000000000000000000000000000000000000000000000000000000000000")
 
@@ -556,7 +556,7 @@ class ContractTestCase(unittest.TestCase):
         # POP
         # MSIZE
         contract = Contract(bytecode="5960005150596039515059")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["0", "20", "60"])
         self.assertEqual("".join(contract.memory), "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 
@@ -565,7 +565,7 @@ class ContractTestCase(unittest.TestCase):
         # JUMPDEST
         # JUMPDEST
         contract = Contract(bytecode="5b5b")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, [])
 
     def test_jump(self):
@@ -576,7 +576,7 @@ class ContractTestCase(unittest.TestCase):
         # JUMPDEST
         # PUSH1 0x01
         contract = Contract(bytecode="600456fe5b6001")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1"])
 
     def test_jumpi(self):
@@ -592,7 +592,7 @@ class ContractTestCase(unittest.TestCase):
         # JUMPDEST
         # PUSH1 0x01
         contract = Contract(bytecode="6000600a576001600c575bfe5b6001")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["1"])
 
     def test_pc(self):
@@ -604,5 +604,47 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # PC
         contract = Contract(bytecode="58585b58600158")
-        contract.execute()
+        contract.execute(transaction={})
         self.assertEqual(contract.stack, ["0", "1", "3", "1", "6"])
+
+    def test_callvalue(self):
+        # https://www.evm.codes/playground?fork=shanghai&callValue=123456789&unit=Wei&codeType=Bytecode&code='34'_
+        # CALLVALUE
+        contract = Contract(bytecode="34")
+        contract.execute(transaction={"value": "123456789"})
+        self.assertEqual(contract.stack, ["75bcd15"])
+
+    def test_calldataload(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff&codeType=Bytecode&code=%27600035601f35%27_
+        # PUSH1 0x00
+        # CALLDATALOAD
+        # PUSH1 0x1f
+        # CALLDATALOAD
+        contract = Contract(bytecode="600035601f35")
+        contract.execute(transaction={"data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"})
+        self.assertEqual(contract.stack, [
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "ff00000000000000000000000000000000000000000000000000000000000000",
+        ])
+
+    def test_calldatasize(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0xff&codeType=Bytecode&code=%2736%27_
+        # CALLDATASIZE
+        contract = Contract(bytecode="36")
+        contract.execute(transaction={"data": "0xff"})
+        self.assertEqual(contract.stack, ["1"])
+
+    def test_calldatacopy(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff&codeType=Bytecode&code=%276020%7E0%7E037%7E8601f%7E037%27%7E600%01%7E_
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CALLDATACOPY
+        # PUSH1 0x08
+        # PUSH1 0x1f
+        # PUSH1 0x00
+        # CALLDATACOPY
+        contract = Contract(bytecode="602060006000376008601f600037")
+        contract.execute(transaction={"data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual("".join(contract.memory), "ff00000000000000ffffffffffffffffffffffffffffffffffffffffffffffff")
