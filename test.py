@@ -195,6 +195,25 @@ class ContractTestCase(unittest.TestCase):
         contract.execute()
         self.assertEqual(contract.stack, ["20"])
 
+    def test_codecopy(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7dxxxxx7fwwww505060206y6y396008601f6y39'~yy00zffffffy000xzzw~~%01wxyz~_
+        # PUSH30 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH32 0x0000000000000000000000000000000000000000000000000000000000000000
+        # POP
+        # POP
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CODECOPY
+        # PUSH1 0x08
+        # PUSH1 0x1f
+        # PUSH1 0x00
+        # CODECOPY
+        contract = Contract(bytecode="7dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000005050602060006000396008601f600039")
+        contract.execute()
+        self.assertEqual(contract.stack, [])
+        self.assertEqual("".join(contract.memory), "7f00000000000000ffffffffffffffffffffffffffffffffffffffffffffff7f")
+
     def test_gaslimit(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
         # GASLIMIT

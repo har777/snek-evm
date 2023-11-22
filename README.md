@@ -42,7 +42,7 @@ An in-progress implementation of the EVM in python.
 | 36   | CALLDATASIZE   |             |
 | 37   | CALLDATACOPY   |             |
 | 38   | CODESIZE       | ✅           |
-| 39   | CODECOPY       |             |
+| 39   | CODECOPY       | ✅           |
 | 3A   | GASPRICE       |             |
 | 3B   | EXTCODESIZE    |             |
 | 3C   | EXTCODECOPY    |             |

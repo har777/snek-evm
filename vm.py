@@ -361,6 +361,26 @@ class Contract:
             self.program_counter += 1
             return
 
+        # CODECOPY
+        elif opcode == "39":
+            memory_offset = int(self.stack.pop(), 16)
+            bytecode_offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((memory_offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            for idx in range(size):
+                try:
+                    bytecode_byte = self.parsed_bytecode[idx + bytecode_offset]
+                except IndexError:
+                    bytecode_byte = "00"
+                self.memory[idx + memory_offset] = bytecode_byte
+
+            self.program_counter += 1
+            return
+
         # GASLIMIT
         elif opcode == "45":
             self.stack.append("ffffffffffff")
