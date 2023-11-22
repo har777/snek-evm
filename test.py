@@ -293,6 +293,46 @@ class ContractTestCase(unittest.TestCase):
         contract.execute()
         self.assertEqual(contract.stack, ["1", "0"])
 
+    def test_mod(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6003600a066005601106'_
+        # PUSH1 0x03
+        # PUSH1 0x0a
+        # MOD
+        # PUSH1 0x05
+        # PUSH1 0x11
+        # MOD
+        contract = Contract(bytecode="6003600a066005601106")
+        contract.execute()
+        self.assertEqual(contract.stack, ["1", "2"])
+
+    def test_addmod(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='z8zaza08z2z27xxxxf08'~yyyyz600yffx~~%01xyz~_
+        # PUSH1 0x08
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # ADDMOD
+        # PUSH1 0x02
+        # PUSH1 0x02
+        # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # ADDMOD
+        contract = Contract(bytecode="6008600a600a08600260027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff08")
+        contract.execute()
+        self.assertEqual(contract.stack, ["4", "1"])
+
+    def test_mulmod(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='z8zaza09zc7xx~7xx~09'~yyyyfz600yfffx~~%01xyz~_
+        # PUSH1 0x08
+        # PUSH1 0x0a
+        # PUSH1 0x0a
+        # MULMOD
+        # PUSH1 0x0c
+        # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # MULMOD
+        contract = Contract(bytecode="6008600a600a09600c7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff09")
+        contract.execute()
+        self.assertEqual(contract.stack, ["4", "9"])
+
     def test_lt(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~a~910~a~a10'~600%01~_
         # PUSH1 0x0a

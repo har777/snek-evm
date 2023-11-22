@@ -12,10 +12,10 @@ An in-progress implementation of the EVM in python.
 | 03   | SUB            | ✅           |
 | 04   | DIV            | ✅           |
 | 05   | SDIV           |             |
-| 06   | MOD            |             |
+| 06   | MOD            | ✅           |
 | 07   | SMOD           |             |
-| 08   | ADDMOD         |             |
-| 09   | MULMOD         |             |
+| 08   | ADDMOD         | ✅           |
+| 09   | MULMOD         | ✅           |
 | 0A   | EXP            |             |
 | 0B   | SIGNEXTEND     |             |
 | 10   | LT             | ✅           |

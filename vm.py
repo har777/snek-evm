@@ -80,10 +80,54 @@ class Contract:
             a = int(self.stack.pop(), 16)
             b = int(self.stack.pop(), 16)
             if b == 0:
-                c = 0
+                c = "0"
             else:
                 c = hex(a // b)[2:]
             self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # MOD
+        elif opcode == "06":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+
+            if b == 0:
+                c = "0"
+            else:
+                c = hex(a % b)[2:]
+
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
+        # ADDMOD
+        elif opcode == "08":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = int(self.stack.pop(), 16)
+
+            if c == 0:
+                d = "0"
+            else:
+                d = hex((a + b) % c)[2:]
+
+            self.stack.append(d)
+            self.program_counter += 1
+            return
+
+        # MULMOD
+        elif opcode == "09":
+            a = int(self.stack.pop(), 16)
+            b = int(self.stack.pop(), 16)
+            c = int(self.stack.pop(), 16)
+
+            if c == 0:
+                d = "0"
+            else:
+                d = hex((a * b) % c)[2:]
+
+            self.stack.append(d)
             self.program_counter += 1
             return
 
