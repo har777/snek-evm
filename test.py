@@ -763,3 +763,35 @@ class ContractTestCase(unittest.TestCase):
         contract.execute(transaction={})
         self.assertEqual(contract.stack, ["29045a592007d0c246ef02c2223570da9522d0cf0f73282c79a1bc8f0bb2c238"])
         self.assertEqual("".join(contract.memory), "ffffffff00000000000000000000000000000000000000000000000000000000")
+
+    def test_invalid(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6100ff61230555fe6001'_
+        # PUSH2 0x00ff
+        # PUSH2 0x2305
+        # SSTORE
+        # INVALID
+        # PUSH1 0x01
+        contract = Contract(bytecode="6100ff61230555fe6001")
+        contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual(contract.storage, {})
+        self.assertEqual("".join(contract.memory), "")
+
+    def test_revert(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6042600052602060006100ff61230555fd6042'_
+        # PUSH1 0x42
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # PUSH2 0x00ff
+        # PUSH2 0x2305
+        # SSTORE
+        # REVERT
+        # PUSH1 0x42
+        contract = Contract(bytecode="6042600052602060006100ff61230555fd6042")
+        out = contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual("".join(contract.memory), "0000000000000000000000000000000000000000000000000000000000000042")
+        self.assertEqual(contract.storage, {})
+        self.assertEqual(out, "0x0000000000000000000000000000000000000000000000000000000000000042")

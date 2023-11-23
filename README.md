@@ -147,5 +147,6 @@ An in-progress implementation of the EVM in python.
 | F4   | DELEGATECALL   |             |
 | F5   | CREATE2        |             |
 | FA   | STATICCALL     |             |
-| FD   | REVERT         |             |
+| FD   | REVERT         | ✅           |
+| FE   | INVALID        | ✅           |
 | FF   | SELFDESTRUCT   |             |

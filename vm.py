@@ -24,6 +24,7 @@ class Contract:
         self.memory = []
 
         self.storage = {}
+        self.old_storage = {}
 
         self.logs = []
 
@@ -585,6 +586,34 @@ class Contract:
             self.stopped = True
             return return_bytes
 
+        # REVERT
+        elif opcode == "fd":
+            offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            return_bytes_array = []
+            for idx in range(size):
+                byte = self.memory[idx + offset]
+                return_bytes_array.append(byte)
+
+            return_bytes = "0x" + "".join(return_bytes_array)
+
+            self.storage = self.old_storage
+            self.program_counter += 1
+            self.stopped = True
+            return return_bytes
+
+        # INVALID
+        elif opcode == "fe":
+            self.storage = self.old_storage
+            self.stopped = True
+            self.program_counter += 1
+            return
+
         else:
             print(f"OPCODE {opcode} not implemented")
             self.stopped = True
@@ -599,8 +628,12 @@ class Contract:
 
         self.stack = []
         self.memory = []
+        self.old_storage = dict(self.storage)
 
         out = None
         while not self.stopped:
             out = self.step()
+
+        self.old_storage = {}
+
         return out
