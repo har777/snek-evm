@@ -2,6 +2,8 @@ import math
 
 from collections import deque
 
+from Crypto.Hash import keccak
+
 
 class Contract:
     def __init__(self, bytecode: str):
@@ -241,6 +243,27 @@ class Contract:
             shifted_value = hex((value >> shift) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)[2:]
             self.stack.append(shifted_value)
 
+            self.program_counter += 1
+            return
+
+        # SHA3
+        elif opcode == "20":
+            offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            memory_bytes_array = []
+            for idx in range(size):
+                memory_byte = self.memory[idx + offset]
+                memory_bytes_array.append(memory_byte)
+
+            memory_bytes = "".join(memory_bytes_array)
+            hashed_value = keccak.new(digest_bits=256, data=bytes.fromhex(memory_bytes)).hexdigest()
+
+            self.stack.append(hashed_value)
             self.program_counter += 1
             return
 

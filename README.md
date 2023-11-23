@@ -32,7 +32,7 @@ An in-progress implementation of the EVM in python.
 | 1B   | SHL            | ✅           |
 | 1C   | SHR            | ✅           |
 | 1D   | SAR            |             |
-| 20   | KECCAK256      |             |
+| 20   | SHA3           | ✅           |
 | 30   | ADDRESS        |             |
 | 31   | BALANCE        |             |
 | 32   | ORIGIN         |             |

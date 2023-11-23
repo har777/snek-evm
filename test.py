@@ -750,3 +750,16 @@ class ContractTestCase(unittest.TestCase):
         self.assertEqual(contract.stack, [])
         self.assertEqual("".join(contract.memory), "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000000000000000000000000000000000000000000000000000000000000000")
         self.assertEqual(out, "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
+
+    def test_sha3(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7fffffffffyyyy6z5260046z20'~zz0z000y~~%01yz~_
+        # PUSH32 0xffffffff00000000000000000000000000000000000000000000000000000000
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x04
+        # PUSH1 0x00
+        # SHA3
+        contract = Contract(bytecode="7fffffffff000000000000000000000000000000000000000000000000000000006000526004600020")
+        contract.execute(transaction={})
+        self.assertEqual(contract.stack, ["29045a592007d0c246ef02c2223570da9522d0cf0f73282c79a1bc8f0bb2c238"])
+        self.assertEqual("".join(contract.memory), "ffffffff00000000000000000000000000000000000000000000000000000000")
