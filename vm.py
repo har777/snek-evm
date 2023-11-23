@@ -542,6 +542,26 @@ class Contract:
             self.program_counter += 1
             return
 
+        # RETURN
+        elif opcode == "f3":
+            offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            return_bytes_array = []
+            for idx in range(size):
+                byte = self.memory[idx + offset]
+                return_bytes_array.append(byte)
+
+            return_bytes = "0x" + "".join(return_bytes_array)
+
+            self.program_counter += 1
+            self.stopped = True
+            return return_bytes
+
         else:
             print(f"OPCODE {opcode} not implemented")
             self.stopped = True
@@ -557,5 +577,7 @@ class Contract:
         self.stack = []
         self.memory = []
 
+        out = None
         while not self.stopped:
-            self.step()
+            out = self.step()
+        return out

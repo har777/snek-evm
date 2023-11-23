@@ -143,7 +143,7 @@ An in-progress implementation of the EVM in python.
 | F0   | CREATE         |             |
 | F1   | CALL           |             |
 | F2   | CALLCODE       |             |
-| F3   | RETURN         |             |
+| F3   | RETURN         | ✅           |
 | F4   | DELEGATECALL   |             |
 | F5   | CREATE2        |             |
 | FA   | STATICCALL     |             |

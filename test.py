@@ -736,3 +736,17 @@ class ContractTestCase(unittest.TestCase):
             "topic2": "0x4f6742badb049791cd9a37ea913f2bac38d01279",
             "topic3": "0x2ccc2087078963d621f42338ab0",
         }])
+
+    def test_return(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef6z527fyyyyy00226zf3'~zzz000y~~%01yz~_
+        # PUSH32 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0x0000000000000000000000000000000000000000000000000000000000000022
+        # PUSH1 0x00
+        # RETURN
+        contract = Contract(bytecode="7fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef6000527f00000000000000000000000000000000000000000000000000000000000000226000f3")
+        out = contract.execute(transaction={})
+        self.assertEqual(contract.stack, [])
+        self.assertEqual("".join(contract.memory), "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000000000000000000000000000000000000000000000000000000000000000")
+        self.assertEqual(out, "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
