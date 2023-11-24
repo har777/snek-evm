@@ -27,6 +27,7 @@ class Contract:
         self.old_storage = {}
 
         self.logs = []
+        self.old_logs = []
 
         self.stopped = False
 
@@ -603,6 +604,7 @@ class Contract:
             return_bytes = "0x" + "".join(return_bytes_array)
 
             self.storage = self.old_storage
+            self.logs = self.old_logs
             self.program_counter += 1
             self.stopped = True
             return return_bytes
@@ -610,6 +612,7 @@ class Contract:
         # INVALID
         elif opcode == "fe":
             self.storage = self.old_storage
+            self.logs = self.old_logs
             self.stopped = True
             self.program_counter += 1
             return
@@ -629,11 +632,13 @@ class Contract:
         self.stack = []
         self.memory = []
         self.old_storage = dict(self.storage)
+        self.old_logs = list(self.old_logs)
 
         out = None
         while not self.stopped:
             out = self.step()
 
         self.old_storage = {}
+        self.old_logs = []
 
         return out
