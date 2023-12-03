@@ -141,7 +141,7 @@ An in-progress implementation of the EVM in python.
 | A3   | LOG3           | ✅           |
 | A4   | LOG4           | ✅           |
 | F0   | CREATE         |             |
-| F1   | CALL           |             |
+| F1   | CALL           | ✅           |
 | F2   | CALLCODE       |             |
 | F3   | RETURN         | ✅           |
 | F4   | DELEGATECALL   |             |

@@ -6,7 +6,8 @@ from vm import EVM, TransactionMetadata
 class ContractTestCase(unittest.TestCase):
     def setUp(self):
         self.evm = EVM()
-        self.address_1 = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        self.address_1 = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+        self.address_2 = "0xd8da6bf26964af9d7eed9e03e53415d37aa96046"
 
     def test_stop(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a00600a'_
@@ -799,3 +800,40 @@ class ContractTestCase(unittest.TestCase):
         self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000000000000000000000000000042")
         self.assertEqual(contract.storage, {})
         self.assertEqual(operation.return_bytes, "0x0000000000000000000000000000000000000000000000000000000000000042")
+
+    def test_call(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600035600757fe5b'_
+        # PUSH1 0x00
+        # CALLDATALOAD
+        # PUSH1 0x07
+        # JUMPI
+        # INVALID
+        # JUMPDEST
+        self.evm.create_contract(bytecode="600035600757fe5b", address=self.address_1)
+
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='zzw~yf1zzx2~y7067z35w757fe5bz52w8x18f3z52f1'~0zz73d8da6bf26964af9d7eed9e03e53415d37aa9xzw0y4561ffffx60wx0%01wxyz~_
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH20 0xd8da6bf26964af9d7eed9e03e53415d37aa96045
+        # PUSH2 0xffff
+        # CALL
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH20 0xd8da6bf26964af9d7eed9e03e53415d37aa96045
+        # PUSH2 0xffff
+        # PUSH17 0x67600035600757fe5b60005260086018f3
+        # PUSH1 0x00
+        # MSTORE
+        # CALL
+        self.evm.create_contract(bytecode="6000600060006000600073d8da6bf26964af9d7eed9e03e53415d37aa9604561fffff16000600060206000600073d8da6bf26964af9d7eed9e03e53415d37aa9604561ffff7067600035600757fe5b60005260086018f3600052f1", address=self.address_2)
+
+        operation = self.evm.execute_transaction(address=self.address_2, transaction_metadata=TransactionMetadata())
+        self.assertEqual(operation.stack, ["0", "1"])
+        self.assertEqual("".join(operation.memory), "00000000000000000000000000000067600035600757fe5b60005260086018f3")
+        self.assertEqual(operation.return_bytes, "")

@@ -16,6 +16,8 @@ class Operation:
     def __init__(self, evm, address, transaction_metadata):
         self.status = OperationStatus.EXECUTING
 
+        self.evm = evm
+
         self.contract = evm.address_to_contract[address]
         bytecode = self.contract.bytecode
 
@@ -33,7 +35,9 @@ class Operation:
         self.old_storage = dict(self.contract.storage)
         self.old_logs = list(self.contract.logs)
 
-        self.return_bytes = None
+        self.child_operations = []
+
+        self.return_bytes = ""
 
     def debug(self):
         print(f"contract: {self.contract}")
@@ -411,7 +415,7 @@ class Operation:
             new_program_counter = int(self.stack.pop(), 16)
             if self.parsed_bytecode[new_program_counter] != "5b":
                 print("invalid JUMP")
-                self.status = OperationStatus.FAILURE
+                self.rollback()
             else:
                 self.program_counter = new_program_counter
             return
@@ -424,7 +428,7 @@ class Operation:
             if condition != 0:
                 if self.parsed_bytecode[new_program_counter] != "5b":
                     print("invalid JUMP")
-                    self.status = OperationStatus.FAILURE
+                    self.rollback()
                 else:
                     self.program_counter = new_program_counter
             else:
@@ -439,7 +443,6 @@ class Operation:
         # PC
         elif opcode == "58":
             self.stack.append(str(self.program_counter))
-
             self.program_counter += 1
             return
 
@@ -447,7 +450,6 @@ class Operation:
         elif opcode == "59":
             memory_size = hex(len(self.memory))[2:]
             self.stack.append(memory_size)
-
             self.program_counter += 1
             return
 
@@ -572,6 +574,44 @@ class Operation:
             self.program_counter += 1
             return
 
+        # CALL
+        elif opcode == "f1":
+            self.stack.pop()
+            address = "0x" + self.stack.pop()
+            self.stack.pop()
+            args_offset = int(self.stack.pop(), 16)
+            args_size = int(self.stack.pop(), 16)
+            ret_offset = int(self.stack.pop(), 16)
+            ret_size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((args_offset + args_size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            operation_calldata = "0x" + "".join(self.memory[args_offset: args_offset+args_size])
+
+            operation = self.evm.execute_transaction(
+                address=address,
+                transaction_metadata=TransactionMetadata(data=operation_calldata)
+            )
+
+            self.child_operations.append(operation)
+            if operation.status == OperationStatus.FAILURE:
+                self.stack.append("0")
+            else:
+                min_required_memory_size = math.ceil((ret_offset + ret_size) / 32) * 32
+                if min_required_memory_size > len(self.memory):
+                    self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+                return_bytes_array = [operation.return_bytes[2:][i:i+2] for i in range(0, len(operation.return_bytes[2:]), 2)]
+                for idx in range(ret_size):
+                    byte = return_bytes_array[idx]
+                    self.memory[idx + ret_offset] = byte
+
+                self.stack.append("1")
+
+            self.program_counter += 1
+
         # RETURN
         elif opcode == "f3":
             offset = int(self.stack.pop(), 16)
@@ -608,32 +648,38 @@ class Operation:
 
             return_bytes = "0x" + "".join(return_bytes_array)
 
-            self.contract.storage = self.old_storage
-            self.contract.logs = self.old_logs
-            self.program_counter += 1
-            self.status = OperationStatus.FAILURE
+            self.rollback()
             self.return_bytes = return_bytes
 
         # INVALID
         elif opcode == "fe":
-            self.contract.storage = self.old_storage
-            self.contract.logs = self.old_logs
-            self.status = OperationStatus.FAILURE
-            self.program_counter += 1
+            self.rollback()
             return
 
         else:
             print(f"OPCODE {opcode} not implemented")
-            self.status = OperationStatus.FAILURE
+            self.rollback()
             return
 
+    def rollback(self):
+        for child_operation in reversed(self.child_operations):
+            child_operation.rollback()
+
+        self.contract.storage = self.old_storage
+        self.contract.logs = self.old_logs
+        self.status = OperationStatus.FAILURE
+
     def execute(self, debug=False):
-        if debug:
-            self.debug()
-        while self.status == OperationStatus.EXECUTING:
-            self.step()
+        try:
             if debug:
                 self.debug()
+            while self.status == OperationStatus.EXECUTING:
+                self.step()
+                if debug:
+                    self.debug()
+        except Exception as e:
+            self.rollback()
+            raise e
 
 
 class Contract:
