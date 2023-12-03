@@ -746,10 +746,10 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # RETURN
         operation = Operation(bytecode="7fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef6000527f00000000000000000000000000000000000000000000000000000000000000226000f3")
-        out = operation.execute(transaction={})
+        operation.execute(transaction={})
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000000000000000000000000000000000000000000000000000000000000000")
-        self.assertEqual(out, "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
+        self.assertEqual(operation.return_bytes, "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
 
     def test_sha3(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7fffffffffyyyy6z5260046z20'~zz0z000y~~%01yz~_
@@ -790,8 +790,8 @@ class ContractTestCase(unittest.TestCase):
         # REVERT
         # PUSH1 0x42
         operation = Operation(bytecode="6042600052602060006100ff61230555fd6042")
-        out = operation.execute(transaction={})
+        operation.execute(transaction={})
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000000000000000000000000000042")
         self.assertEqual(operation.storage, {})
-        self.assertEqual(out, "0x0000000000000000000000000000000000000000000000000000000000000042")
+        self.assertEqual(operation.return_bytes, "0x0000000000000000000000000000000000000000000000000000000000000042")

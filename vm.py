@@ -29,6 +29,8 @@ class Operation:
         self.logs = []
         self.old_logs = []
 
+        self.return_bytes = None
+
         self.stopped = False
 
     def debug(self):
@@ -585,7 +587,7 @@ class Operation:
 
             self.program_counter += 1
             self.stopped = True
-            return return_bytes
+            self.return_bytes = return_bytes
 
         # REVERT
         elif opcode == "fd":
@@ -607,7 +609,7 @@ class Operation:
             self.logs = self.old_logs
             self.program_counter += 1
             self.stopped = True
-            return return_bytes
+            self.return_bytes = return_bytes
 
         # INVALID
         elif opcode == "fe":
@@ -634,11 +636,8 @@ class Operation:
         self.old_storage = dict(self.storage)
         self.old_logs = list(self.old_logs)
 
-        out = None
         while not self.stopped:
-            out = self.step()
+            self.step()
 
         self.old_storage = {}
         self.old_logs = []
-
-        return out
