@@ -723,3 +723,6 @@ class EVM:
         )
         operation.execute(debug=debug)
         return operation
+
+    def __str__(self):
+        return f"EVM(address_to_contract={self.address_to_contract})"
