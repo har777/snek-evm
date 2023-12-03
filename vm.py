@@ -16,8 +16,8 @@ class Operation:
     def __init__(self, evm, address, transaction_metadata):
         self.status = OperationStatus.EXECUTING
 
-        self.contract = contract = evm.address_to_contract[address]
-        bytecode = contract.bytecode
+        self.contract = evm.address_to_contract[address]
+        bytecode = self.contract.bytecode
 
         # split into array of 2 characters
         self.parsed_bytecode = [bytecode[i:i+2] for i in range(0, len(bytecode), 2)]
@@ -30,8 +30,8 @@ class Operation:
         self.stack = []
         self.memory = []
 
-        self.old_storage = dict(contract.storage)
-        self.old_logs = list(contract.logs)
+        self.old_storage = dict(self.contract.storage)
+        self.old_logs = list(self.contract.logs)
 
         self.return_bytes = None
 
