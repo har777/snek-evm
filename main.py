@@ -1,9 +1,9 @@
-from vm import Contract
+from vm import Operation
 
 if __name__ == '__main__':
-    contract = Contract(bytecode="")
-    contract.transaction = {}
-    contract.debug()
-    while not contract.stopped:
-        contract.step()
-        contract.debug()
+    operation = Operation(bytecode="")
+    operation.transaction = {}
+    operation.debug()
+    while not operation.stopped:
+        operation.step()
+        operation.debug()

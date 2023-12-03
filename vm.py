@@ -5,7 +5,7 @@ from collections import deque
 from Crypto.Hash import keccak
 
 
-class Contract:
+class Operation:
     def __init__(self, bytecode: str):
         # bytecode has to be even length
         if len(bytecode) == 0 or len(bytecode) % 2 != 0:
