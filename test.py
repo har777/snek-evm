@@ -1,65 +1,69 @@
 import unittest
 
-from vm import Operation
+from vm import EVM, TransactionMetadata
 
 
 class ContractTestCase(unittest.TestCase):
+    def setUp(self):
+        self.evm = EVM()
+        self.address_1 = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+
     def test_stop(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a00600a'_
         # PUSH1 0x0a
         # STOP
         # PUSH1 0x0a
-        operation = Operation(bytecode="600a00600a")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600a00600a", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["a"])
 
     def test_push0(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='5f5f'_
         # PUSH0
         # PUSH0
-        operation = Operation(bytecode="5f5f")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="5f5f", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["0", "0"])
 
     def test_push1(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='60ff6000'_
         # PUSH1 0xff
         # PUSH1 0x00
-        operation = Operation(bytecode="60ff6000")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="60ff6000", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ff", "0"])
 
     def test_push31(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7eyyyyyw7exxxxxv'~wwwzvvvy~~xzzwffv00%01vwxyz~_
         # PUSH31 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # PUSH31 0x00000000000000000000000000000000000000000000000000000000000000
-        operation = Operation(
-            bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e00000000000000000000000000000000000000000000000000000000000000")
-        operation.execute(transaction={})
+        self.evm.create_contract(
+            bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e00000000000000000000000000000000000000000000000000000000000000", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "0"])
 
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7ezzzzz7e7e0a'~ffffffz~~%01z~_
         # PUSH31 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e
         # PUSH31 0x0a
-        operation = Operation(bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e7e0a")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e7e0a", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e", "a"])
 
     def test_push32(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000'_
         # PUSH32 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         # PUSH32 0x0000000000000000000000000000000000000000000000000000000000000000
-        operation = Operation(
-            bytecode="7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000")
-        operation.execute(transaction={})
+        self.evm.create_contract(
+            bytecode="7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "0"])
 
     def test_dup1(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600180'_
         # PUSH1 0x01
         # DUP1
-        operation = Operation(bytecode="600180")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600180", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "1"])
 
     def test_dup2(self):
@@ -67,8 +71,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # PUSH1 0x00
         # DUP2
-        operation = Operation(bytecode="6001600081")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6001600081", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "0", "1"])
 
     def test_dup15(self):
@@ -89,8 +93,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # PUSH1 0x00
         # DUP15
-        operation = Operation(bytecode="6001600060006000600060006000600060006000600060006000600060008e")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6001600060006000600060006000600060006000600060006000600060008e", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"])
 
@@ -113,8 +117,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # PUSH1 0x00
         # DUP16
-        operation = Operation(bytecode="60016000600060006000600060006000600060006000600060006000600060008f")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="60016000600060006000600060006000600060006000600060006000600060008f", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"])
 
@@ -123,8 +127,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x02
         # PUSH1 0x01
         # SWAP1
-        operation = Operation(bytecode="6002600190")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6002600190", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "2"])
 
     def test_swap2(self):
@@ -133,8 +137,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # PUSH1 0x01
         # SWAP2
-        operation = Operation(bytecode="60026000600191")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="60026000600191", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "0", "2"])
 
     def test_swap15(self):
@@ -156,8 +160,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # PUSH1 0x01
         # SWAP15
-        operation = Operation(bytecode="60026000600060006000600060006000600060006000600060006000600060019e")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="60026000600060006000600060006000600060006000600060006000600060019e", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
 
@@ -181,8 +185,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # PUSH1 0x01
         # SWAP16
-        operation = Operation(bytecode="600260006000600060006000600060006000600060006000600060006000600060019f")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600260006000600060006000600060006000600060006000600060006000600060019f", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
 
@@ -191,8 +195,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH29 0x0000000000000000000000000000000000000000000000000000000000
         # POP
         # CODESIZE
-        operation = Operation(bytecode="7c00000000000000000000000000000000000000000000000000000000005038")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="7c00000000000000000000000000000000000000000000000000000000005038", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["20"])
 
     def test_codecopy(self):
@@ -209,38 +213,38 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x1f
         # PUSH1 0x00
         # CODECOPY
-        operation = Operation(bytecode="7dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000005050602060006000396008601f600039")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="7dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000005050602060006000396008601f600039", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "7f00000000000000ffffffffffffffffffffffffffffffffffffffffffffff7f")
 
     def test_gaslimit(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
         # GASLIMIT
-        operation = Operation(bytecode="45")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="45", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ffffffffffff"])
 
     def test_chainid(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='46'_
         # CHAINID
-        operation = Operation(bytecode="46")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="46", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1"])
 
     def test_basefee(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='48'_
         # BASEFEE
-        operation = Operation(bytecode="48")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="48", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["a"])
 
     def test_pop(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6201ec2150'_
         # PUSH3 0x01ec21
         # POP
-        operation = Operation(bytecode="6201ec2150")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6201ec2150", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
 
     def test_add(self):
@@ -251,9 +255,9 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # PUSH1 0x01
         # ADD
-        operation = Operation(
-            bytecode="600a600a017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600101")
-        operation.execute(transaction={})
+        self.evm.create_contract(
+            bytecode="600a600a017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600101", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["14", "0"])
 
     def test_mul(self):
@@ -264,9 +268,9 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # PUSH1 0x02
         # MUL
-        operation = Operation(
-            bytecode="600a600a027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600202")
-        operation.execute(transaction={})
+        self.evm.create_contract(
+            bytecode="600a600a027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600202", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["64", "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"])
 
     def test_sub(self):
@@ -277,8 +281,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x01
         # PUSH1 0x00
         # SUB
-        operation = Operation(bytecode="600a600a036001600003")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600a600a036001600003", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["0", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"])
 
     def test_div(self):
@@ -289,8 +293,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x02
         # PUSH1 0x01
         # DIV
-        operation = Operation(bytecode="600a600a046002600104")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="600a600a046002600104", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_mod(self):
@@ -301,8 +305,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x05
         # PUSH1 0x11
         # MOD
-        operation = Operation(bytecode="6003600a066005601106")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6003600a066005601106", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "2"])
 
     def test_addmod(self):
@@ -315,8 +319,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x02
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # ADDMOD
-        operation = Operation(bytecode="6008600a600a08600260027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff08")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6008600a600a08600260027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff08", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["4", "1"])
 
     def test_mulmod(self):
@@ -329,8 +333,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # MULMOD
-        operation = Operation(bytecode="6008600a600a09600c7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff09")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6008600a600a09600c7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff09", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["4", "9"])
 
     def test_lt(self):
@@ -341,8 +345,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # PUSH1 0x0a
         # LT
-        operation = Operation(bytecode="600a600910600a600a10")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600a600910600a600a10", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_gt(self):
@@ -353,8 +357,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # PUSH1 0x0a
         # GT
-        operation = Operation(bytecode="6009600a11600a600a11")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6009600a11600a600a11", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_eq(self):
@@ -365,8 +369,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x05
         # PUSH1 0x0a
         # EQ
-        operation = Operation(bytecode="600a600a146005600a14")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600a600a146005600a14", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_iszero(self):
@@ -375,8 +379,8 @@ class ContractTestCase(unittest.TestCase):
         # ISZERO
         # PUSH1 0x00
         # ISZERO
-        operation = Operation(bytecode="600a15600015")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600a15600015", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["0", "1"])
 
     def test_and(self):
@@ -387,8 +391,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x00
         # PUSH1 0xff
         # AND
-        operation = Operation(bytecode="600f600f16600060ff16")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600f600f16600060ff16", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["f", "0"])
 
     def test_or(self):
@@ -399,8 +403,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0xff
         # OR
-        operation = Operation(bytecode="600f60f01760ff60ff17")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600f60f01760ff60ff17", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ff", "ff"])
 
     def test_xor(self):
@@ -411,8 +415,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0xff
         # XOR
-        operation = Operation(bytecode="600f60f01860ff60ff18")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600f60f01860ff60ff18", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ff", "0"])
 
     def test_not(self):
@@ -425,9 +429,9 @@ class ContractTestCase(unittest.TestCase):
         # NOT
         # PUSH32 0xffffffff00ffffffffffffffffffffffffffffffffffffffffffff00ffffffff
         # NOT
-        operation = Operation(bytecode="6000196001197fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-                                     "ffff197fffffffff00ffffffffffffffffffffffffffffffffffffffffffff00ffffffff19")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6000196001197fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                                     "ffff197fffffffff00ffffffffffffffffffffffffffffffffffffffffffff00ffffffff19", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(
             operation.stack,
             [
@@ -449,8 +453,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0x20
         # BYTE
-        operation = Operation(bytecode="60ff601f1a61ff00601e1a60ff60201a")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="60ff601f1a61ff00601e1a60ff60201a", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ff", "ff", "0"])
 
     def test_shl(self):
@@ -461,8 +465,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0xff00000000000000000000000000000000000000000000000000000000000000
         # PUSH1 0x04
         # SHL
-        operation = Operation(bytecode="600160011b7fff0000000000000000000000000000000000000000000000000000000000000060041b")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600160011b7fff0000000000000000000000000000000000000000000000000000000000000060041b", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["2", "f000000000000000000000000000000000000000000000000000000000000000"])
 
     def test_shr(self):
@@ -473,8 +477,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0x04
         # SHR
-        operation = Operation(bytecode="600260011c60ff60041c")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600260011c60ff60041c", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1", "f"])
 
     def test_sload(self):
@@ -486,10 +490,10 @@ class ContractTestCase(unittest.TestCase):
         # SLOAD
         # PUSH1 0x01
         # SLOAD
-        operation = Operation(bytecode="602e600055600054600154")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="602e600055600054600154", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["2e", "0"])
-        self.assertEqual(operation.storage, {"0": "2e"})
+        self.assertEqual(contract.storage, {"0": "2e"})
 
     def test_sstore(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='61ffff6000556100ff61230555'_
@@ -499,10 +503,10 @@ class ContractTestCase(unittest.TestCase):
         # PUSH2 0x00ff
         # PUSH2 0x2305
         # SSTORE
-        operation = Operation(bytecode="61ffff6000556100ff61230555")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="61ffff6000556100ff61230555", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
-        self.assertEqual(operation.storage, {"0": "ffff", "2305": "ff"})
+        self.assertEqual(contract.storage, {"0": "ffff", "2305": "ff"})
 
     def test_mstore(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~052~152'~60ff600%01~_
@@ -512,8 +516,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0x01
         # MSTORE
-        operation = Operation(bytecode="60ff60005260ff600152")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="60ff60005260ff600152", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000000000000000000000000000000ff00000000000000000000000000000000000000000000000000000000000000")
 
@@ -525,8 +529,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0x01
         # MSTORE8
-        operation = Operation(bytecode="61ffee60005360ff600153")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="61ffee60005360ff600153", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "eeff000000000000000000000000000000000000000000000000000000000000")
 
@@ -539,8 +543,8 @@ class ContractTestCase(unittest.TestCase):
         # MLOAD
         # PUSH1 0x01
         # MLOAD
-        operation = Operation(bytecode="7f00000000000000000000000000000000000000000000000000000000000000ff600052600051600151")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="7f00000000000000000000000000000000000000000000000000000000000000ff600052600051600151", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["ff", "ff00"])
         self.assertEqual("".join(operation.memory), "00000000000000000000000000000000000000000000000000000000000000ff0000000000000000000000000000000000000000000000000000000000000000")
 
@@ -555,8 +559,8 @@ class ContractTestCase(unittest.TestCase):
         # MLOAD
         # POP
         # MSIZE
-        operation = Operation(bytecode="5960005150596039515059")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="5960005150596039515059", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["0", "20", "60"])
         self.assertEqual("".join(operation.memory), "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 
@@ -564,8 +568,8 @@ class ContractTestCase(unittest.TestCase):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='5b5b'_
         # JUMPDEST
         # JUMPDEST
-        operation = Operation(bytecode="5b5b")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="5b5b", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
 
     def test_jump(self):
@@ -575,8 +579,8 @@ class ContractTestCase(unittest.TestCase):
         # INVALID
         # JUMPDEST
         # PUSH1 0x01
-        operation = Operation(bytecode="600456fe5b6001")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="600456fe5b6001", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1"])
 
     def test_jumpi(self):
@@ -591,8 +595,8 @@ class ContractTestCase(unittest.TestCase):
         # INVALID
         # JUMPDEST
         # PUSH1 0x01
-        operation = Operation(bytecode="6000600a576001600c575bfe5b6001")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="6000600a576001600c575bfe5b6001", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["1"])
 
     def test_pc(self):
@@ -603,15 +607,15 @@ class ContractTestCase(unittest.TestCase):
         # PC
         # PUSH1 0x01
         # PC
-        operation = Operation(bytecode="58585b58600158")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="58585b58600158", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["0", "1", "3", "1", "6"])
 
     def test_callvalue(self):
         # https://www.evm.codes/playground?fork=shanghai&callValue=123456789&unit=Wei&codeType=Bytecode&code='34'_
         # CALLVALUE
-        operation = Operation(bytecode="34")
-        operation.execute(transaction={"value": "123456789"})
+        self.evm.create_contract(bytecode="34", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(value="123456789"))
         self.assertEqual(operation.stack, ["75bcd15"])
 
     def test_calldataload(self):
@@ -620,8 +624,8 @@ class ContractTestCase(unittest.TestCase):
         # CALLDATALOAD
         # PUSH1 0x1f
         # CALLDATALOAD
-        operation = Operation(bytecode="600035601f35")
-        operation.execute(transaction={"data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"})
+        self.evm.create_contract(bytecode="600035601f35", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
         self.assertEqual(operation.stack, [
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
             "ff00000000000000000000000000000000000000000000000000000000000000",
@@ -630,8 +634,8 @@ class ContractTestCase(unittest.TestCase):
     def test_calldatasize(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0xff&codeType=Bytecode&code=%2736%27_
         # CALLDATASIZE
-        operation = Operation(bytecode="36")
-        operation.execute(transaction={"data": "0xff"})
+        self.evm.create_contract(bytecode="36", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xff"))
         self.assertEqual(operation.stack, ["1"])
 
     def test_calldatacopy(self):
@@ -644,8 +648,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x1f
         # PUSH1 0x00
         # CALLDATACOPY
-        operation = Operation(bytecode="602060006000376008601f600037")
-        operation.execute(transaction={"data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"})
+        self.evm.create_contract(bytecode="602060006000376008601f600037", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "ff00000000000000ffffffffffffffffffffffffffffffffffffffffffffffff")
 
@@ -656,10 +660,10 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x20
         # PUSH1 0x00
         # LOG0
-        operation = Operation(bytecode="60ff60005260206000a0")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="60ff60005260206000a0", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
-        self.assertEqual(operation.logs, [{"data": "0xff"}])
+        self.assertEqual(contract.logs, [{"data": "0xff"}])
 
     def test_log1(self):
         # PUSH1 0xff
@@ -669,10 +673,10 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x20
         # PUSH1 0x00
         # LOG1
-        operation = Operation(bytecode="60ff6000527fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a1")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="60ff6000527fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a1", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
-        self.assertEqual(operation.logs, [{
+        self.assertEqual(contract.logs, [{
             "data": "0xff",
             "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
         }])
@@ -686,10 +690,10 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x20
         # PUSH1 0x00
         # LOG2
-        operation = Operation(bytecode="60ff6000527f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a2")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="60ff6000527f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a2", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
-        self.assertEqual(operation.logs, [{
+        self.assertEqual(contract.logs, [{
             "data": "0xff",
             "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
             "topic1": "0xbae7ebe87fc708426a193f49c4829cdc6221ac84",
@@ -705,10 +709,10 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x20
         # PUSH1 0x00
         # LOG3
-        operation = Operation(bytecode="60ff6000527f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a3")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="60ff6000527f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a3", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
-        self.assertEqual(operation.logs, [{
+        self.assertEqual(contract.logs, [{
             "data": "0xff",
             "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
             "topic1": "0xbae7ebe87fc708426a193f49c4829cdc6221ac84",
@@ -726,10 +730,10 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x3c
         # PUSH1 0x00
         # LOG4
-        operation = Operation(bytecode="60ff6000526f000002ccc2087078963d621f42338ab07f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef603c6000a4")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="60ff6000526f000002ccc2087078963d621f42338ab07f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef603c6000a4", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
-        self.assertEqual(operation.logs, [{
+        self.assertEqual(contract.logs, [{
             "data": "0xff00000000000000000000000000000000000000000000000000000000",
             "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
             "topic1": "0xbae7ebe87fc708426a193f49c4829cdc6221ac84",
@@ -745,8 +749,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH32 0x0000000000000000000000000000000000000000000000000000000000000022
         # PUSH1 0x00
         # RETURN
-        operation = Operation(bytecode="7fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef6000527f00000000000000000000000000000000000000000000000000000000000000226000f3")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="7fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef6000527f00000000000000000000000000000000000000000000000000000000000000226000f3", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000000000000000000000000000000000000000000000000000000000000000")
         self.assertEqual(operation.return_bytes, "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
@@ -759,8 +763,8 @@ class ContractTestCase(unittest.TestCase):
         # PUSH1 0x04
         # PUSH1 0x00
         # SHA3
-        operation = Operation(bytecode="7fffffffff000000000000000000000000000000000000000000000000000000006000526004600020")
-        operation.execute(transaction={})
+        self.evm.create_contract(bytecode="7fffffffff000000000000000000000000000000000000000000000000000000006000526004600020", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, ["29045a592007d0c246ef02c2223570da9522d0cf0f73282c79a1bc8f0bb2c238"])
         self.assertEqual("".join(operation.memory), "ffffffff00000000000000000000000000000000000000000000000000000000")
 
@@ -771,10 +775,10 @@ class ContractTestCase(unittest.TestCase):
         # SSTORE
         # INVALID
         # PUSH1 0x01
-        operation = Operation(bytecode="6100ff61230555fe6001")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="6100ff61230555fe6001", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
-        self.assertEqual(operation.storage, {})
+        self.assertEqual(contract.storage, {})
         self.assertEqual("".join(operation.memory), "")
 
     def test_revert(self):
@@ -789,9 +793,9 @@ class ContractTestCase(unittest.TestCase):
         # SSTORE
         # REVERT
         # PUSH1 0x42
-        operation = Operation(bytecode="6042600052602060006100ff61230555fd6042")
-        operation.execute(transaction={})
+        contract = self.evm.create_contract(bytecode="6042600052602060006100ff61230555fd6042", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(), debug=True)
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000000000000000000000000000042")
-        self.assertEqual(operation.storage, {})
+        self.assertEqual(contract.storage, {})
         self.assertEqual(operation.return_bytes, "0x0000000000000000000000000000000000000000000000000000000000000042")

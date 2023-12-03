@@ -13,42 +13,37 @@ class OperationStatus(Enum):
 
 
 class Operation:
-    def __init__(self, bytecode: str):
+    def __init__(self, evm, address, transaction_metadata):
         self.status = OperationStatus.EXECUTING
 
-        # bytecode has to be even length
-        if len(bytecode) == 0 or len(bytecode) % 2 != 0:
-            raise Exception("Invalid bytecode length")
+        self.contract = contract = evm.address_to_contract[address]
+        bytecode = contract.bytecode
 
         # split into array of 2 characters
         self.parsed_bytecode = [bytecode[i:i+2] for i in range(0, len(bytecode), 2)]
 
-        self.transaction = {}
+        self.transaction_metadata = transaction_metadata
 
         # pointer used to decide what opcode to step into next
         self.program_counter = 0
 
         self.stack = []
-
         self.memory = []
 
-        self.storage = {}
-        self.old_storage = {}
-
-        self.logs = []
-        self.old_logs = []
+        self.old_storage = dict(contract.storage)
+        self.old_logs = list(contract.logs)
 
         self.return_bytes = None
 
     def debug(self):
-        print(f"bytecode: {''.join(self.parsed_bytecode)}")
+        print(f"contract: {self.contract}")
         print(f"parsed_bytecode: {self.parsed_bytecode}")
-        print(f"transaction: {self.transaction}")
         print(f"program_counter: {self.program_counter}")
+        print(f"transaction_metadata: {self.transaction_metadata}")
         print(f"stack: {self.stack}")
         print(f"memory: {self.memory}")
-        print(f"storage: {self.storage}")
         print(f"status: {self.status}")
+        print("\n")
 
     def step(self):
         if self.program_counter >= len(self.parsed_bytecode):
@@ -281,7 +276,7 @@ class Operation:
 
         # CALLVALUE
         elif opcode == "34":
-            call_value = hex(int(self.transaction["value"]))[2:]
+            call_value = hex(int(self.transaction_metadata.value))[2:]
             self.stack.append(call_value)
             self.program_counter += 1
             return
@@ -290,7 +285,7 @@ class Operation:
         elif opcode == "35":
             offset = int(self.stack.pop(), 16)
 
-            calldata = self.transaction.get("data", "0x")[2:]
+            calldata = self.transaction_metadata.data[2:]
             parsed_calldata = [calldata[i:i + 2] for i in range(0, len(calldata), 2)]
 
             bytes_list = []
@@ -309,7 +304,7 @@ class Operation:
 
         # CALLDATASIZE
         elif opcode == "36":
-            calldata = self.transaction.get("data", "0x")[2:]
+            calldata = self.transaction_metadata.data[2:]
             parsed_calldata = [calldata[i:i + 2] for i in range(0, len(calldata), 2)]
             calldata_size = hex(len(parsed_calldata))[2:]
 
@@ -324,7 +319,7 @@ class Operation:
             calldata_offset = int(self.stack.pop(), 16)
             size = int(self.stack.pop(), 16)
 
-            calldata = self.transaction.get("data", "0x")[2:]
+            calldata = self.transaction_metadata.data[2:]
             parsed_calldata = [calldata[i:i + 2] for i in range(0, len(calldata), 2)]
 
             min_required_memory_size = math.ceil((memory_offset + size) / 32) * 32
@@ -398,7 +393,7 @@ class Operation:
         # SLOAD
         elif opcode == "54":
             key = self.stack.pop()
-            value = self.storage.get(key, "0")
+            value = self.contract.storage.get(key, "0")
             self.stack.append(value)
             self.program_counter += 1
             return
@@ -407,7 +402,7 @@ class Operation:
         elif opcode == "55":
             key = self.stack.pop()
             value = self.stack.pop()
-            self.storage[key] = value
+            self.contract.storage[key] = value
             self.program_counter += 1
             return
 
@@ -522,7 +517,7 @@ class Operation:
             data = hex(int("".join(data_byte_array), 16))
 
             log = {"data": data, **topics}
-            self.logs.append(log)
+            self.contract.logs.append(log)
 
             self.program_counter += 1
             return
@@ -613,16 +608,16 @@ class Operation:
 
             return_bytes = "0x" + "".join(return_bytes_array)
 
-            self.storage = self.old_storage
-            self.logs = self.old_logs
+            self.contract.storage = self.old_storage
+            self.contract.logs = self.old_logs
             self.program_counter += 1
             self.status = OperationStatus.FAILURE
             self.return_bytes = return_bytes
 
         # INVALID
         elif opcode == "fe":
-            self.storage = self.old_storage
-            self.logs = self.old_logs
+            self.contract.storage = self.old_storage
+            self.contract.logs = self.old_logs
             self.status = OperationStatus.FAILURE
             self.program_counter += 1
             return
@@ -632,20 +627,53 @@ class Operation:
             self.status = OperationStatus.FAILURE
             return
 
-    def execute(self, transaction):
-        # calldata has to be even length if present
-        if len(transaction.get("data", "0x")) % 2 != 0:
-            raise Exception("Invalid calldata length")
-
-        self.transaction = transaction
-
-        self.stack = []
-        self.memory = []
-        self.old_storage = dict(self.storage)
-        self.old_logs = list(self.old_logs)
-
+    def execute(self, debug=False):
+        if debug:
+            self.debug()
         while self.status == OperationStatus.EXECUTING:
             self.step()
+            if debug:
+                self.debug()
 
-        self.old_storage = {}
-        self.old_logs = []
+
+class Contract:
+    def __init__(self, bytecode, address):
+        self.bytecode = bytecode
+        self.address = address
+        self.storage = {}
+        self.logs = []
+
+    def __str__(self):
+        return f"Contract(bytecode={self.bytecode}, address={self.address}, storage={self.storage}, logs={self.logs})"
+
+
+class TransactionMetadata:
+    def __init__(self, value="0", data="0x"):
+        # calldata has to be even length if present
+        if len(data) % 2 != 0:
+            raise Exception("Invalid calldata length")
+
+        self.value = value
+        self.data = data
+
+    def __str__(self):
+        return f"TransactionMetadata(value={self.value}, data={self.data})"
+
+
+class EVM:
+    def __init__(self):
+        self.address_to_contract = {}
+
+    def create_contract(self, bytecode, address):
+        contract = Contract(bytecode=bytecode, address=address)
+        self.address_to_contract[address] = contract
+        return contract
+
+    def execute_transaction(self, address, transaction_metadata, debug=False):
+        operation = Operation(
+            evm=self,
+            address=address,
+            transaction_metadata=transaction_metadata
+        )
+        operation.execute(debug=debug)
+        return operation
