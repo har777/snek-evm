@@ -794,7 +794,7 @@ class ContractTestCase(unittest.TestCase):
         # REVERT
         # PUSH1 0x42
         contract = self.evm.create_contract(bytecode="6042600052602060006100ff61230555fd6042", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(), debug=True)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000000000000000000000000000042")
         self.assertEqual(contract.storage, {})
