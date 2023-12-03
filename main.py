@@ -1,9 +1,9 @@
-from vm import Operation
+from vm import Operation, OperationStatus
 
 if __name__ == '__main__':
     operation = Operation(bytecode="")
     operation.transaction = {}
     operation.debug()
-    while not operation.stopped:
+    while operation.status == OperationStatus.EXECUTING:
         operation.step()
         operation.debug()

@@ -1,12 +1,21 @@
 import math
 
 from collections import deque
+from enum import Enum
 
 from Crypto.Hash import keccak
 
 
+class OperationStatus(Enum):
+    EXECUTING = "EXECUTING"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+
+
 class Operation:
     def __init__(self, bytecode: str):
+        self.status = OperationStatus.EXECUTING
+
         # bytecode has to be even length
         if len(bytecode) == 0 or len(bytecode) % 2 != 0:
             raise Exception("Invalid bytecode length")
@@ -31,8 +40,6 @@ class Operation:
 
         self.return_bytes = None
 
-        self.stopped = False
-
     def debug(self):
         print(f"bytecode: {''.join(self.parsed_bytecode)}")
         print(f"parsed_bytecode: {self.parsed_bytecode}")
@@ -41,14 +48,14 @@ class Operation:
         print(f"stack: {self.stack}")
         print(f"memory: {self.memory}")
         print(f"storage: {self.storage}")
-        print(f"stopped: {self.stopped}")
+        print(f"status: {self.status}")
 
     def step(self):
         if self.program_counter >= len(self.parsed_bytecode):
-            self.stopped = True
+            self.status = OperationStatus.SUCCESS
 
         # code done executing
-        if self.stopped:
+        if self.status in {OperationStatus.SUCCESS, OperationStatus.FAILURE}:
             return
 
         opcode = self.parsed_bytecode[self.program_counter]
@@ -56,7 +63,8 @@ class Operation:
         # STOP
         if opcode == "00":
             self.program_counter += 1
-            self.stopped = True
+            # eh revisit
+            self.status = OperationStatus.SUCCESS
             return
 
         # ADD a b
@@ -408,7 +416,7 @@ class Operation:
             new_program_counter = int(self.stack.pop(), 16)
             if self.parsed_bytecode[new_program_counter] != "5b":
                 print("invalid JUMP")
-                self.stopped = True
+                self.status = OperationStatus.FAILURE
             else:
                 self.program_counter = new_program_counter
             return
@@ -421,7 +429,7 @@ class Operation:
             if condition != 0:
                 if self.parsed_bytecode[new_program_counter] != "5b":
                     print("invalid JUMP")
-                    self.stopped = True
+                    self.status = OperationStatus.FAILURE
                 else:
                     self.program_counter = new_program_counter
             else:
@@ -586,7 +594,7 @@ class Operation:
             return_bytes = "0x" + "".join(return_bytes_array)
 
             self.program_counter += 1
-            self.stopped = True
+            self.status = OperationStatus.SUCCESS
             self.return_bytes = return_bytes
 
         # REVERT
@@ -608,20 +616,20 @@ class Operation:
             self.storage = self.old_storage
             self.logs = self.old_logs
             self.program_counter += 1
-            self.stopped = True
+            self.status = OperationStatus.FAILURE
             self.return_bytes = return_bytes
 
         # INVALID
         elif opcode == "fe":
             self.storage = self.old_storage
             self.logs = self.old_logs
-            self.stopped = True
+            self.status = OperationStatus.FAILURE
             self.program_counter += 1
             return
 
         else:
             print(f"OPCODE {opcode} not implemented")
-            self.stopped = True
+            self.status = OperationStatus.FAILURE
             return
 
     def execute(self, transaction):
@@ -636,7 +644,7 @@ class Operation:
         self.old_storage = dict(self.storage)
         self.old_logs = list(self.old_logs)
 
-        while not self.stopped:
+        while self.status == OperationStatus.EXECUTING:
             self.step()
 
         self.old_storage = {}
