@@ -783,6 +783,13 @@ class OpcodeTestCase(unittest.TestCase):
         self.assertEqual(operation.stack, ["29045a592007d0c246ef02c2223570da9522d0cf0f73282c79a1bc8f0bb2c238"])
         self.assertEqual("".join(operation.memory), "ffffffff00000000000000000000000000000000000000000000000000000000")
 
+    def test_address(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='30'_
+        # ADDRESS
+        self.evm.create_contract(bytecode="30", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        self.assertEqual(operation.stack, [self.address_1[2:]])
+
     def test_invalid(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6100ff61230555fe6001'_
         # PUSH2 0x00ff

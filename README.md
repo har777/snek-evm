@@ -83,7 +83,7 @@ child_operations = operation.child_operations
 | 1C   | SHR            | ✅           |
 | 1D   | SAR            |             |
 | 20   | SHA3           | ✅           |
-| 30   | ADDRESS        |             |
+| 30   | ADDRESS        | ✅           |
 | 31   | BALANCE        |             |
 | 32   | ORIGIN         |             |
 | 33   | CALLER         |             |

@@ -279,6 +279,12 @@ class Operation:
             self.program_counter += 1
             return
 
+        # ADDRESS
+        elif opcode == "30":
+            self.stack.append(self.contract.address[2:])
+            self.program_counter += 1
+            return
+
         # CALLVALUE
         elif opcode == "34":
             call_value = hex(int(self.transaction_metadata.value))[2:]
@@ -712,7 +718,7 @@ class EVM:
         self.address_to_contract = {}
 
     def create_contract(self, bytecode, address):
-        contract = Contract(bytecode=bytecode, address=address)
+        contract = Contract(bytecode=bytecode.lower(), address=address.lower())
         self.address_to_contract[address] = contract
         return contract
 
