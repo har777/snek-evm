@@ -3,6 +3,7 @@ import math
 from collections import deque
 from enum import Enum
 
+import rlp
 from Crypto.Hash import keccak
 
 
@@ -726,3 +727,9 @@ class EVM:
 
     def __str__(self):
         return f"EVM(address_to_contract={self.address_to_contract})"
+
+
+def get_create_contract_address(sender_address: str, sender_nonce: int):
+    sender = bytes.fromhex(sender_address[2:])
+    contract_address = "0x" + keccak.new(digest_bits=256, data=rlp.encode([sender, sender_nonce])).hexdigest()[-40:]
+    return contract_address

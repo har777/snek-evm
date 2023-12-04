@@ -1,9 +1,23 @@
 import unittest
 
-from vm import EVM, TransactionMetadata
+from vm import EVM, TransactionMetadata, get_create_contract_address
 
 
-class ContractTestCase(unittest.TestCase):
+class UtilTestCase(unittest.TestCase):
+    def test_get_create_contract_address(self):
+        sender_address = "0x6ac7ea33f8831ea9dcc53393aaa88b25a785dbf0"
+
+        self.assertEqual(get_create_contract_address(sender_address=sender_address, sender_nonce=0),
+                         "0xcd234a471b72ba2f1ccf0a70fcaba648a5eecd8d")
+        self.assertEqual(get_create_contract_address(sender_address=sender_address, sender_nonce=1),
+                         "0x343c43a37d37dff08ae8c4a11544c718abb4fcf8")
+        self.assertEqual(get_create_contract_address(sender_address=sender_address, sender_nonce=2),
+                         "0xf778b86fa74e846c4f0a1fbd1335fe81c00a0c91")
+        self.assertEqual(get_create_contract_address(sender_address=sender_address, sender_nonce=3),
+                         "0xfffd933a0bc612844eaf0c6fe3e5b8e9b6c1d19c")
+
+
+class OpcodeTestCase(unittest.TestCase):
     def setUp(self):
         self.evm = EVM()
         self.address_1 = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
