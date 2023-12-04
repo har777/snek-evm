@@ -892,4 +892,85 @@ class OpcodeTestCase(unittest.TestCase):
 
         self.assertEqual(contract.nonce, 3)
 
-        # TODO: test failures scenarios: both parent context and create context failures
+        # parent context fails -> check if all created contracts get deleted
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~~yz9f06c63ffffffffx4601cf3xd6013yfd'~z0z600y~f0~~x~52z%01xyz~_
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x09
+        # CREATE
+        # PUSH13 0x63ffffffff6000526004601cf3
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x0d
+        # PUSH1 0x13
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # REVERT
+        self.evm = EVM()
+
+        contract = self.evm.create_contract(bytecode="600060006000f0600060006009f06c63ffffffff6000526004601cf3600052600d60136000f060006000fd", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+
+        created_contract_1_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=0)
+        created_contract_2_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=1)
+        created_contract_3_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=2)
+
+        self.assertEqual(operation.stack, [created_contract_1_address[2:], created_contract_2_address[2:], created_contract_3_address[2:]])
+        self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000063ffffffff6000526004601cf3")
+
+        self.assertEqual(self.evm.address_to_contract.get(created_contract_1_address, None), None)
+        self.assertEqual(self.evm.address_to_contract.get(created_contract_2_address, None), None)
+        self.assertEqual(self.evm.address_to_contract.get(created_contract_3_address, None), None)
+
+        self.assertEqual(contract.nonce, 0)
+
+        # 3rd child context fails -> check if 1st, 2nd and 4th CREATE calls are successful
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~~x~~y09f0yfez1y1fx6c63ffffffffz4y1cf3zdy13x'~y00z~52y0y60x~f0%01xyz~_
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x09
+        # CREATE
+        # PUSH1 0xfe
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x01
+        # PUSH1 0x1f
+        # PUSH1 0x00
+        # CREATE
+        # PUSH13 0x63ffffffff6000526004601cf3
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x0d
+        # PUSH1 0x13
+        # PUSH1 0x00
+        # CREATE
+
+        self.evm = EVM()
+
+        contract = self.evm.create_contract(bytecode="600060006000f0600060006009f060fe6000526001601f6000f06c63ffffffff6000526004601cf3600052600d60136000f0", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+
+        created_contract_1_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=0)
+        created_contract_2_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=1)
+        created_contract_3_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=2)
+        created_contract_4_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=3)
+
+        self.assertEqual(operation.stack, [created_contract_1_address[2:], created_contract_2_address[2:], "0", created_contract_3_address[2:]])
+        self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000063ffffffff6000526004601cf3")
+
+        self.assertEqual(self.evm.address_to_contract[created_contract_1_address].bytecode, "")
+        self.assertEqual(self.evm.address_to_contract[created_contract_2_address].bytecode, "")
+        self.assertEqual(self.evm.address_to_contract[created_contract_3_address].bytecode, "0xffffffff")
+        self.assertEqual(self.evm.address_to_contract.get(created_contract_4_address, None), None)
+
+        self.assertEqual(contract.nonce, 3)
