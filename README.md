@@ -19,9 +19,9 @@ contract = evm.create_contract(
 # you can access the contract created at any address from the EVM
 contract = evm.address_to_contract["0xd8da6bf26964af9d7eed9e03e53415d37aa96045"]
 
-# access bytecode, address, state and logs from the contract
-bytecode, address, storage, logs = (
-    contract.bytecode, contract.address, contract.storage, contract.logs
+# access bytecode, address, nonce, state and logs from the contract
+bytecode, address, nonce, storage, logs = (
+    contract.bytecode, contract.address, contract.nonce, contract.storage, contract.logs
 )
 
 # execute operation at certain address  
@@ -190,7 +190,7 @@ child_operations = operation.child_operations
 | A2   | LOG2           | ✅           |
 | A3   | LOG3           | ✅           |
 | A4   | LOG4           | ✅           |
-| F0   | CREATE         |             |
+| F0   | CREATE         | ✅           |
 | F1   | CALL           | ✅           |
 | F2   | CALLCODE       |             |
 | F3   | RETURN         | ✅           |

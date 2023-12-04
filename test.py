@@ -858,3 +858,38 @@ class OpcodeTestCase(unittest.TestCase):
         self.assertEqual(operation.stack, ["0", "1"])
         self.assertEqual("".join(operation.memory), "00000000000000000000000000000067600035600757fe5b60005260086018f3")
         self.assertEqual(operation.return_bytes, "")
+
+    def test_create(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~x~~z9f06c63ffffffffy4601cf3ydx'~z0z600y~52zx~~f0%01xyz~_
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x09
+        # CREATE
+        # PUSH13 0x63ffffffff6000526004601cf3
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x0d
+        # PUSH1 0x13
+        # PUSH1 0x00
+        # CREATE
+        contract = self.evm.create_contract(bytecode="600060006000f0600060006009f06c63ffffffff6000526004601cf3600052600d60136000f0", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+
+        created_contract_1_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=0)
+        created_contract_2_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=1)
+        created_contract_3_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=2)
+
+        self.assertEqual(operation.stack, [created_contract_1_address[2:], created_contract_2_address[2:], created_contract_3_address[2:]])
+        self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000063ffffffff6000526004601cf3")
+
+        self.assertEqual(self.evm.address_to_contract[created_contract_1_address].bytecode, "")
+        self.assertEqual(self.evm.address_to_contract[created_contract_2_address].bytecode, "")
+        self.assertEqual(self.evm.address_to_contract[created_contract_3_address].bytecode, "0xffffffff")
+
+        self.assertEqual(contract.nonce, 3)
+
+        # TODO: test failures scenarios: both parent context and create context failures

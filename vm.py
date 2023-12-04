@@ -33,10 +33,12 @@ class Operation:
         self.stack = []
         self.memory = []
 
+        self.old_nonce = self.contract.nonce
         self.old_storage = dict(self.contract.storage)
         self.old_logs = list(self.contract.logs)
 
         self.child_operations = []
+        self.create_contracts = []
 
         self.return_bytes = ""
 
@@ -581,6 +583,37 @@ class Operation:
             self.program_counter += 1
             return
 
+        # CREATE
+        elif opcode == "f0":
+            self.stack.pop()
+            offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            create_bytecode = "".join(self.memory[offset:offset+size])
+            create_address = get_create_contract_address(sender_address=self.contract.address, sender_nonce=self.contract.nonce)
+
+            create_contract = self.evm.create_contract(bytecode=create_bytecode, address=create_address)
+            operation = self.evm.execute_transaction(
+                address=create_address,
+                transaction_metadata=TransactionMetadata()
+            )
+            if operation.status == OperationStatus.FAILURE:
+                self.stack.append("0")
+                del self.evm.address_to_contract[create_address]
+            else:
+                self.create_contracts.append(create_contract)
+                self.contract.nonce += 1
+                self.stack.append(create_address[2:])
+                create_contract.bytecode = operation.return_bytes
+
+            self.program_counter += 1
+
+            return
+
         # CALL
         elif opcode == "f1":
             self.stack.pop()
@@ -595,7 +628,7 @@ class Operation:
             if min_required_memory_size > len(self.memory):
                 self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
 
-            operation_calldata = "0x" + "".join(self.memory[args_offset: args_offset+args_size])
+            operation_calldata = "0x" + "".join(self.memory[args_offset:args_offset+args_size])
 
             operation = self.evm.execute_transaction(
                 address=address,
@@ -618,6 +651,7 @@ class Operation:
                 self.stack.append("1")
 
             self.program_counter += 1
+            return
 
         # RETURN
         elif opcode == "f3":
@@ -639,6 +673,8 @@ class Operation:
             self.status = OperationStatus.SUCCESS
             self.return_bytes = return_bytes
 
+            return
+
         # REVERT
         elif opcode == "fd":
             offset = int(self.stack.pop(), 16)
@@ -658,6 +694,8 @@ class Operation:
             self.rollback()
             self.return_bytes = return_bytes
 
+            return
+
         # INVALID
         elif opcode == "fe":
             self.rollback()
@@ -672,6 +710,11 @@ class Operation:
         for child_operation in reversed(self.child_operations):
             child_operation.rollback()
 
+        for create_contract in self.create_contracts:
+            create_address = create_contract.address
+            del self.evm.address_to_contract[create_address]
+
+        self.contract.nonce = self.old_nonce
         self.contract.storage = self.old_storage
         self.contract.logs = self.old_logs
         self.status = OperationStatus.FAILURE
@@ -693,11 +736,12 @@ class Contract:
     def __init__(self, bytecode, address):
         self.bytecode = bytecode
         self.address = address
+        self.nonce = 0
         self.storage = {}
         self.logs = []
 
     def __str__(self):
-        return f"Contract(bytecode={self.bytecode}, address={self.address}, storage={self.storage}, logs={self.logs})"
+        return f"Contract(bytecode={self.bytecode}, address={self.address}, nonce={self.nonce} storage={self.storage}, logs={self.logs})"
 
 
 class TransactionMetadata:
@@ -718,7 +762,7 @@ class EVM:
         self.address_to_contract = {}
 
     def create_contract(self, bytecode, address):
-        contract = Contract(bytecode=bytecode.lower(), address=address.lower())
+        contract = Contract(bytecode=bytecode, address=address)
         self.address_to_contract[address] = contract
         return contract
 
