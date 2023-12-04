@@ -2,6 +2,56 @@
 
 An in-progress implementation of the EVM in python.
 
+## Usage
+
+```python
+from vm import EVM, TransactionMetadata
+
+# create a new EVM
+evm = EVM()
+
+# create a contract with certain bytecode at a certain address
+contract = evm.create_contract(
+    bytecode="600a00600a", 
+    address="0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+)
+
+# you can access the contract created at any address from the EVM
+contract = evm.address_to_contract["0xd8da6bf26964af9d7eed9e03e53415d37aa96045"]
+
+# access bytecode, address, state and logs from the contract
+bytecode, address, storage, logs = (
+    contract.bytecode, contract.address, contract.storage, contract.logs
+)
+
+# execute operation at certain address  
+# add a optional debu=True flag if you want to see 
+# operation state evolve as each opcode gets executed
+operation = evm.execute_transaction(
+    address="0xd8da6bf26964af9d7eed9e03e53415d37aa96045", 
+    transaction_metadata=TransactionMetadata()
+)
+
+# populate TransactionMetadata with fields necessary for executing the bytecode
+# ------------------------------------
+# field     |      default_value
+# ------------------------------------
+# data      |      "0x"
+# value     |      "0"
+# ------------------------------------
+
+# access stack, memory and return_value from the operation
+stack, memory, return_bytes = (
+    operation.stack, operation.memory, operation.return_bytes
+)
+
+# access state of an operation, one of EXECUTING, SUCCESS or FAILURE
+state = operation.state
+
+# you can also access child_operations executed(eg. a CALL opcode when executed)
+child_operations = operation.child_operations
+```
+
 ## Progress
 
 | Code | Name           | Implemented |
