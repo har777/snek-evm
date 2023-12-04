@@ -233,6 +233,57 @@ class OpcodeTestCase(unittest.TestCase):
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "7f00000000000000ffffffffffffffffffffffffffffffffffffffffffffff7f")
 
+    def test_extcodesize(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7f7vvvx527wx526020xf3yyyyy06020526029xxf03b'~wwfz000yzzzx6zwfffv~~~%01vwxyz~_
+        # PUSH32 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0xff60005260206000f30000000000000000000000000000000000000000000000
+        # PUSH1 0x20
+        # MSTORE
+        # PUSH1 0x29
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # EXTCODESIZE
+        self.evm.create_contract(bytecode="7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f30000000000000000000000000000000000000000000000602052602960006000f03b", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        self.assertEqual(operation.stack, ["20"])
+        self.assertEqual("".join(operation.memory), "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260206000f30000000000000000000000000000000000000000000000")
+
+    def test_extcodecopy(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7f7sssv7uvxyf3wwwww0x52r29yyf0yvyx52xytr08r1ft'~000zuufy6~xr20w~~~vy52ufffty833cszzzr60%01rstuvwxyz~_
+        # PUSH32 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0xff60005260206000f30000000000000000000000000000000000000000000000
+        # PUSH1 0x20
+        # MSTORE
+        # PUSH1 0x29
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x00
+        # PUSH1 0x20
+        # MSTORE
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # DUP4
+        # EXTCODECOPY
+        # PUSH1 0x08
+        # PUSH1 0x1f
+        # PUSH1 0x00
+        # DUP4
+        # EXTCODECOPY
+        self.evm.create_contract(bytecode="7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f30000000000000000000000000000000000000000000000602052602960006000f060006000526000602052602060006000833c6008601f6000833c", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        self.assertEqual(operation.stack, [operation.create_contracts[0].address[2:]])
+        self.assertEqual("".join(operation.memory), "ff00000000000000ffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000")
+
     def test_gaslimit(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
         # GASLIMIT
@@ -768,7 +819,7 @@ class OpcodeTestCase(unittest.TestCase):
         operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000000000000000000000000000000000000000000000000000000000000000")
-        self.assertEqual(operation.return_bytes, "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
+        self.assertEqual(operation.return_bytes, "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
 
     def test_sha3(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7fffffffffyyyy6z5260046z20'~zz0z000y~~%01yz~_
@@ -888,7 +939,7 @@ class OpcodeTestCase(unittest.TestCase):
 
         self.assertEqual(self.evm.address_to_contract[created_contract_1_address].bytecode, "")
         self.assertEqual(self.evm.address_to_contract[created_contract_2_address].bytecode, "")
-        self.assertEqual(self.evm.address_to_contract[created_contract_3_address].bytecode, "0xffffffff")
+        self.assertEqual(self.evm.address_to_contract[created_contract_3_address].bytecode, "ffffffff")
 
         self.assertEqual(contract.nonce, 3)
 
@@ -954,7 +1005,6 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x13
         # PUSH1 0x00
         # CREATE
-
         self.evm = EVM()
 
         contract = self.evm.create_contract(bytecode="600060006000f0600060006009f060fe6000526001601f6000f06c63ffffffff6000526004601cf3600052600d60136000f0", address=self.address_1)
@@ -970,7 +1020,7 @@ class OpcodeTestCase(unittest.TestCase):
 
         self.assertEqual(self.evm.address_to_contract[created_contract_1_address].bytecode, "")
         self.assertEqual(self.evm.address_to_contract[created_contract_2_address].bytecode, "")
-        self.assertEqual(self.evm.address_to_contract[created_contract_3_address].bytecode, "0xffffffff")
+        self.assertEqual(self.evm.address_to_contract[created_contract_3_address].bytecode, "ffffffff")
         self.assertEqual(self.evm.address_to_contract.get(created_contract_4_address, None), None)
 
         self.assertEqual(contract.nonce, 3)

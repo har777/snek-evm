@@ -559,6 +559,46 @@ class Operation:
             self.program_counter += 1
             return
 
+        # EXTCODESIZE
+        elif opcode == "3b":
+            address = "0x" + self.stack.pop()
+            external_contract = self.evm.address_to_contract[address]
+            if not external_contract:
+                self.stack.append("0")
+            else:
+                external_bytecode = external_contract.bytecode
+                external_parsed_bytecode = [external_bytecode[i:i+2] for i in range(0, len(external_bytecode), 2)]
+                code_size = hex(len(external_parsed_bytecode))[2:]
+                self.stack.append(code_size)
+
+            self.program_counter += 1
+            return
+
+        # EXTCODECOPY
+        elif opcode == "3c":
+            address = "0x" + self.stack.pop()
+            memory_offset = int(self.stack.pop(), 16)
+            bytecode_offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((memory_offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            external_contract = self.evm.address_to_contract[address]
+            external_bytecode = external_contract.bytecode if external_contract else ""
+            external_parsed_bytecode = [external_bytecode[i:i + 2] for i in range(0, len(external_bytecode), 2)]
+
+            for idx in range(size):
+                try:
+                    external_bytecode_byte = external_parsed_bytecode[idx + bytecode_offset]
+                except IndexError:
+                    external_bytecode_byte = "00"
+                self.memory[idx + memory_offset] = external_bytecode_byte
+
+            self.program_counter += 1
+            return
+
         # GASLIMIT
         elif opcode == "45":
             self.stack.append("ffffffffffff")
@@ -667,7 +707,7 @@ class Operation:
                 byte = self.memory[idx + offset]
                 return_bytes_array.append(byte)
 
-            return_bytes = "0x" + "".join(return_bytes_array)
+            return_bytes = "".join(return_bytes_array)
 
             self.program_counter += 1
             self.status = OperationStatus.SUCCESS

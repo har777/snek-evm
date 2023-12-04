@@ -94,8 +94,8 @@ child_operations = operation.child_operations
 | 38   | CODESIZE       | ✅           |
 | 39   | CODECOPY       | ✅           |
 | 3A   | GASPRICE       |             |
-| 3B   | EXTCODESIZE    |             |
-| 3C   | EXTCODECOPY    |             |
+| 3B   | EXTCODESIZE    | ✅           |
+| 3C   | EXTCODECOPY    | ✅           |
 | 3D   | RETURNDATASIZE |             |
 | 3E   | RETURNDATACOPY |             |
 | 3F   | EXTCODEHASH    |             |
