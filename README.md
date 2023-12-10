@@ -97,7 +97,7 @@ child_operations = operation.child_operations
 | 3B   | EXTCODESIZE    | ✅           |
 | 3C   | EXTCODECOPY    | ✅           |
 | 3D   | RETURNDATASIZE | ✅           |
-| 3E   | RETURNDATACOPY |             |
+| 3E   | RETURNDATACOPY | ✅           |
 | 3F   | EXTCODEHASH    |             |
 | 40   | BLOCKHASH      |             |
 | 41   | COINBASE       |             |

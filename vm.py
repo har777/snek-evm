@@ -622,6 +622,29 @@ class Operation:
             self.program_counter += 1
             return
 
+        # RETURNDATACOPY
+        elif opcode == "3e":
+            memory_offset = int(self.stack.pop(), 16)
+            return_bytes_offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((memory_offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            if not self.child_operations:
+                parsed_return_bytes = []
+            else:
+                return_bytes = self.child_operations[-1].return_bytes
+                parsed_return_bytes = [return_bytes[i:i+2] for i in range(0, len(return_bytes), 2)]
+
+            for idx in range(size):
+                parsed_return_byte = parsed_return_bytes[idx + return_bytes_offset]
+                self.memory[idx + memory_offset] = parsed_return_byte
+
+            self.program_counter += 1
+            return
+
         # GASLIMIT
         elif opcode == "45":
             self.stack.append("ffffffffffff")

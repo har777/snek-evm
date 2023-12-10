@@ -312,6 +312,52 @@ class OpcodeTestCase(unittest.TestCase):
         self.assertEqual(operation.stack, ["3e4ea2156166390f880071d94458efb098473311", "1", "20"])
         self.assertEqual("".join(operation.memory), "7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f3000000000000000000000000000000000000000000000060205260296000f300000000000000000000000000000000000000")
 
+    def test_returndatacopy(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7f7f7qqqqqfppyvwswv7fx0wvt29s00t40vt4drf0rr8463zua5050rvywvyt40vwr3et01t1fw3e'~000zuuy6~x~~~wt20v52uffft60syf3xxxxryyqzzpyv7u%01pqrstuvwxyz~_
+        # PUSH32 0x7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0xff6000527fff60005260206000f3000000000000000000000000000000000000
+        # PUSH1 0x20
+        # MSTORE
+        # PUSH32 0x000000000060205260296000f300000000000000000000000000000000000000
+        # PUSH1 0x40
+        # MSTORE
+        # PUSH1 0x4d
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # DUP5
+        # PUSH4 0xffffffff
+        # STATICCALL
+        # POP
+        # POP
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x00
+        # PUSH1 0x20
+        # MSTORE
+        # PUSH1 0x00
+        # PUSH1 0x40
+        # MSTORE
+        # PUSH1 0x20
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # RETURNDATACOPY
+        # PUSH1 0x01
+        # PUSH1 0x1f
+        # PUSH1 0x20
+        # RETURNDATACOPY
+        self.evm.create_contract(bytecode="7f7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff6000527fff60005260206000f30000000000000000000000000000000000006020527f000000000060205260296000f300000000000000000000000000000000000000604052604d60006000f060006000600060008463fffffffffa50506000600052600060205260006040526020600060003e6001601f60203e", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        self.assertEqual(operation.stack, [])
+        self.assertEqual("".join(operation.memory), "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+
     def test_gaslimit(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
         # GASLIMIT
