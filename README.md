@@ -196,7 +196,7 @@ child_operations = operation.child_operations
 | F3   | RETURN         | ✅           |
 | F4   | DELEGATECALL   |             |
 | F5   | CREATE2        |             |
-| FA   | STATICCALL     |             |
+| FA   | STATICCALL     | ✅           |
 | FD   | REVERT         | ✅           |
 | FE   | INVALID        | ✅           |
 | FF   | SELFDESTRUCT   |             |

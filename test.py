@@ -910,6 +910,35 @@ class OpcodeTestCase(unittest.TestCase):
         self.assertEqual("".join(operation.memory), "00000000000000000000000000000067600035600757fe5b60005260086018f3")
         self.assertEqual(operation.return_bytes, "")
 
+    def test_staticcall(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7f7f7rrrrrft7wt7wtv0uvs7fy0vsv9u00604s604dxxf0xxxx8463zwa'~000zwwy~~~x6~wfffv602uxf3yyyytx52s052rzz%01rstuvwxyz~_
+        # PUSH32 0x7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0xff6000527fff60005260206000f3000000000000000000000000000000000000
+        # PUSH1 0x20
+        # MSTORE
+        # PUSH32 0x000000000060205260296000f300000000000000000000000000000000000000
+        # PUSH1 0x40
+        # MSTORE
+        # PUSH1 0x4d
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # DUP5
+        # PUSH4 0xffffffff
+        # STATICCALL
+        self.evm.create_contract(bytecode="7f7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff6000527fff60005260206000f30000000000000000000000000000000000006020527f000000000060205260296000f300000000000000000000000000000000000000604052604d60006000f060006000600060008463fffffffffa", address=self.address_1)
+
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        self.assertEqual(operation.stack, ["3e4ea2156166390f880071d94458efb098473311", "1"])
+        self.assertEqual("".join(operation.memory), "7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f3000000000000000000000000000000000000000000000060205260296000f300000000000000000000000000000000000000")
+        self.assertEqual(operation.return_bytes, "")
+
     def test_create(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~x~~z9f06c63ffffffffy4601cf3ydx'~z0z600y~52zx~~f0%01xyz~_
         # PUSH1 0x00

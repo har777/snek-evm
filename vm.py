@@ -14,7 +14,7 @@ class OperationStatus(Enum):
 
 
 class Operation:
-    def __init__(self, evm, address, transaction_metadata):
+    def __init__(self, evm, address, transaction_metadata, is_static_call_context=False):
         self.status = OperationStatus.EXECUTING
 
         self.evm = evm
@@ -26,6 +26,8 @@ class Operation:
         self.parsed_bytecode = [bytecode[i:i+2] for i in range(0, len(bytecode), 2)]
 
         self.transaction_metadata = transaction_metadata
+
+        self.is_static_call_context = is_static_call_context
 
         # pointer used to decide what opcode to step into next
         self.program_counter = 0
@@ -413,6 +415,10 @@ class Operation:
 
         # SSTORE
         elif opcode == "55":
+            if self.is_static_call_context:
+                self.rollback()
+                return
+
             key = self.stack.pop()
             value = self.stack.pop()
             self.contract.storage[key] = value
@@ -509,6 +515,10 @@ class Operation:
 
         # LOG0 to LOG4
         elif opcode in {"a0", "a1", "a2", "a3", "a4"}:
+            if self.is_static_call_context:
+                self.rollback()
+                return
+
             offset = int(self.stack.pop(), 16)
             size = int(self.stack.pop(), 16)
 
@@ -625,6 +635,10 @@ class Operation:
 
         # CREATE
         elif opcode == "f0":
+            if self.is_static_call_context:
+                self.rollback()
+                return
+
             self.stack.pop()
             offset = int(self.stack.pop(), 16)
             size = int(self.stack.pop(), 16)
@@ -658,11 +672,15 @@ class Operation:
         elif opcode == "f1":
             self.stack.pop()
             address = "0x" + self.stack.pop()
-            self.stack.pop()
+            value = self.stack.pop()
             args_offset = int(self.stack.pop(), 16)
             args_size = int(self.stack.pop(), 16)
             ret_offset = int(self.stack.pop(), 16)
             ret_size = int(self.stack.pop(), 16)
+
+            if self.is_static_call_context and value != 0:
+                self.rollback()
+                return
 
             min_required_memory_size = math.ceil((args_offset + args_size) / 32) * 32
             if min_required_memory_size > len(self.memory):
@@ -672,7 +690,8 @@ class Operation:
 
             operation = self.evm.execute_transaction(
                 address=address,
-                transaction_metadata=TransactionMetadata(data=operation_calldata)
+                transaction_metadata=TransactionMetadata(data=operation_calldata),
+                is_static_call_context=self.is_static_call_context
             )
 
             self.child_operations.append(operation)
@@ -713,6 +732,46 @@ class Operation:
             self.status = OperationStatus.SUCCESS
             self.return_bytes = return_bytes
 
+            return
+
+        # STATICCALL
+        elif opcode == "fa":
+            self.stack.pop()
+            address = "0x" + self.stack.pop()
+            args_offset = int(self.stack.pop(), 16)
+            args_size = int(self.stack.pop(), 16)
+            ret_offset = int(self.stack.pop(), 16)
+            ret_size = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((args_offset + args_size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            operation_calldata = "0x" + "".join(self.memory[args_offset:args_offset + args_size])
+
+            operation = self.evm.execute_transaction(
+                address=address,
+                transaction_metadata=TransactionMetadata(data=operation_calldata),
+                is_static_call_context=True
+            )
+
+            self.child_operations.append(operation)
+            if operation.status == OperationStatus.FAILURE:
+                self.stack.append("0")
+            else:
+                min_required_memory_size = math.ceil((ret_offset + ret_size) / 32) * 32
+                if min_required_memory_size > len(self.memory):
+                    self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+                return_bytes_array = [operation.return_bytes[2:][i:i + 2] for i in
+                                      range(0, len(operation.return_bytes[2:]), 2)]
+                for idx in range(ret_size):
+                    byte = return_bytes_array[idx]
+                    self.memory[idx + ret_offset] = byte
+
+                self.stack.append("1")
+
+            self.program_counter += 1
             return
 
         # REVERT
@@ -806,11 +865,12 @@ class EVM:
         self.address_to_contract[address] = contract
         return contract
 
-    def execute_transaction(self, address, transaction_metadata, debug=False):
+    def execute_transaction(self, address, transaction_metadata, is_static_call_context=False, debug=False):
         operation = Operation(
             evm=self,
             address=address,
-            transaction_metadata=transaction_metadata
+            transaction_metadata=transaction_metadata,
+            is_static_call_context=is_static_call_context,
         )
         operation.execute(debug=debug)
         return operation
