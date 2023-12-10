@@ -284,6 +284,34 @@ class OpcodeTestCase(unittest.TestCase):
         self.assertEqual(operation.stack, [operation.create_contracts[0].address[2:]])
         self.assertEqual("".join(operation.memory), "ff00000000000000ffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000")
 
+    def test_returndatasize(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7f7f7rrrrrft7wt7wtv0uvs7fy0vsv9u00604s604dxxf0xxxx8463zwa3d'~000zwwy~~~x6~wfffv602uxf3yyyytx52s052rzz%01rstuvwxyz~_
+        # PUSH32 0x7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH32 0xff6000527fff60005260206000f3000000000000000000000000000000000000
+        # PUSH1 0x20
+        # MSTORE
+        # PUSH32 0x000000000060205260296000f300000000000000000000000000000000000000
+        # PUSH1 0x40
+        # MSTORE
+        # PUSH1 0x4d
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # DUP5
+        # PUSH4 0xffffffff
+        # STATICCALL
+        # RETURNDATASIZE
+        self.evm.create_contract(bytecode="7f7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff6000527fff60005260206000f30000000000000000000000000000000000006020527f000000000060205260296000f300000000000000000000000000000000000000604052604d60006000f060006000600060008463fffffffffa3d", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        self.assertEqual(operation.stack, ["3e4ea2156166390f880071d94458efb098473311", "1", "20"])
+        self.assertEqual("".join(operation.memory), "7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f3000000000000000000000000000000000000000000000060205260296000f300000000000000000000000000000000000000")
+
     def test_gaslimit(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
         # GASLIMIT

@@ -609,6 +609,19 @@ class Operation:
             self.program_counter += 1
             return
 
+        # RETURNDATASIZE
+        elif opcode == "3d":
+            if not self.child_operations:
+                self.stack.append("0")
+            else:
+                return_bytes = self.child_operations[-1].return_bytes
+                parsed_return_bytes = [return_bytes[i:i+2] for i in range(0, len(return_bytes), 2)]
+                return_size = hex(len(parsed_return_bytes))[2:]
+                self.stack.append(return_size)
+
+            self.program_counter += 1
+            return
+
         # GASLIMIT
         elif opcode == "45":
             self.stack.append("ffffffffffff")
