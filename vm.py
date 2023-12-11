@@ -787,6 +787,52 @@ class Operation:
 
             return
 
+        # CREATE2
+        elif opcode == "f5":
+            if self.operation_metadata.is_static_call_context:
+                self.rollback()
+                return
+
+            self.stack.pop()
+            offset = int(self.stack.pop(), 16)
+            size = int(self.stack.pop(), 16)
+            salt = int(self.stack.pop(), 16)
+
+            min_required_memory_size = math.ceil((offset + size) / 32) * 32
+            if min_required_memory_size > len(self.memory):
+                self.memory.extend(["00" for _ in range(min_required_memory_size - len(self.memory))])
+
+            create2_bytecode = "".join(self.memory[offset:offset+size])
+
+            parent_operation = self
+            while parent_operation.operation_metadata.parent_operation:
+                parent_operation = parent_operation.operation_metadata.parent_operation
+            origin_address = parent_operation.transaction_metadata.from_address
+
+            create2_address = get_create2_contract_address(origin_address=origin_address, salt=salt, initialisation_code=create2_bytecode)
+
+            if create2_address in self.evm.address_to_contract:
+                self.stack.append("0")
+            else:
+                create2_contract = self.evm.create_contract(bytecode=create2_bytecode, address=create2_address)
+                operation = self.evm.execute_transaction(
+                    address=create2_address,
+                    transaction_metadata=TransactionMetadata(from_address=self.contract.address),
+                    operation_metadata=OperationMetadata(is_static_call_context=self.operation_metadata.is_static_call_context, parent_operation=self)
+                )
+                if operation.status == OperationStatus.FAILURE:
+                    self.stack.append("0")
+                    del self.evm.address_to_contract[create2_address]
+                else:
+                    self.create_contracts.append(create2_contract)
+                    self.contract.nonce += 1
+                    self.stack.append(create2_address[2:])
+                    create2_contract.bytecode = operation.return_bytes
+
+            self.program_counter += 1
+
+            return
+
         # STATICCALL
         elif opcode == "fa":
             self.stack.pop()
@@ -948,4 +994,14 @@ class EVM:
 def get_create_contract_address(sender_address: str, sender_nonce: int):
     sender = bytes.fromhex(sender_address[2:])
     contract_address = "0x" + keccak.new(digest_bits=256, data=rlp.encode([sender, sender_nonce])).hexdigest()[-40:]
+    return contract_address
+
+
+def get_create2_contract_address(origin_address: str, salt: int, initialisation_code: str):
+    contract_address = "0x" + keccak.new(digest_bits=256, data=(
+            bytes.fromhex("ff") +
+            bytes.fromhex(origin_address[2:]) +
+            bytes.fromhex(hex(salt)[2:].rjust(64, "0")) +
+            bytes.fromhex(keccak.new(digest_bits=256, data=bytes.fromhex(initialisation_code)).hexdigest())
+    )).hexdigest()[-40:]
     return contract_address

@@ -1,6 +1,6 @@
 import unittest
 
-from vm import EVM, TransactionMetadata, get_create_contract_address
+from vm import EVM, TransactionMetadata, get_create_contract_address, get_create2_contract_address
 
 
 class UtilTestCase(unittest.TestCase):
@@ -15,6 +15,65 @@ class UtilTestCase(unittest.TestCase):
                          "0xf778b86fa74e846c4f0a1fbd1335fe81c00a0c91")
         self.assertEqual(get_create_contract_address(sender_address=sender_address, sender_nonce=3),
                          "0xfffd933a0bc612844eaf0c6fe3e5b8e9b6c1d19c")
+
+    def test_get_create2_contract_address(self):
+        # https://eips.ethereum.org/EIPS/eip-1014
+        self.assertEqual(
+            get_create2_contract_address(
+                origin_address="0x0000000000000000000000000000000000000000",
+                salt=0,
+                initialisation_code="00"
+            ),
+            "0x4d1a2e2bb4f88f0250f26ffff098b0b30b26bf38"
+        )
+        self.assertEqual(
+            get_create2_contract_address(
+                origin_address="0xdeadbeef00000000000000000000000000000000",
+                salt=0,
+                initialisation_code="00"
+            ),
+            "0xb928f69bb1d91cd65274e3c79d8986362984fda3"
+        )
+        self.assertEqual(
+            get_create2_contract_address(
+                origin_address="0xdeadbeef00000000000000000000000000000000",
+                salt=1455368932401306996839762510191304720241787928576,
+                initialisation_code="00"
+            ),
+            "0xd04116cdd17bebe565eb2422f2497e06cc1c9833"
+        )
+        self.assertEqual(
+            get_create2_contract_address(
+                origin_address="0x0000000000000000000000000000000000000000",
+                salt=0,
+                initialisation_code="deadbeef"
+            ),
+            "0x70f2b2914a2a4b783faefb75f459a580616fcb5e"
+        )
+        self.assertEqual(
+            get_create2_contract_address(
+                origin_address="0x00000000000000000000000000000000deadbeef",
+                salt=3405691582,
+                initialisation_code="deadbeef"
+            ),
+            "0x60f3f640a8508fc6a86d45df051962668e1e8ac7"
+        )
+        self.assertEqual(
+            get_create2_contract_address(
+                origin_address="0x00000000000000000000000000000000deadbeef",
+                salt=3405691582,
+                initialisation_code="deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+            ),
+            "0x1d8bfdc5d46dc4f61d6b6115972536ebe6a8854c"
+        )
+        self.assertEqual(
+            get_create2_contract_address(
+                origin_address="0x0000000000000000000000000000000000000000",
+                salt=0,
+                initialisation_code=""
+            ),
+            "0xe33c0c7f7df4809055c3eba6c09cfe4baf1bd9e0"
+        )
 
 
 class OpcodeTestCase(unittest.TestCase):
@@ -1142,3 +1201,42 @@ class OpcodeTestCase(unittest.TestCase):
         self.assertEqual(self.evm.address_to_contract.get(created_contract_4_address, None), None)
 
         self.assertEqual(contract.nonce, 3)
+
+    def test_create2(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='yyz1~~z9f56c63ffffffffx4601cf3x2zd6013~f5'~z0z600y~~~~f5x~52z%01xyz~_
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE2
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # CREATE2
+        # PUSH1 0x01
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # PUSH1 0x09
+        # CREATE2
+        # PUSH13 0x63ffffffff6000526004601cf3
+        # PUSH1 0x00
+        # MSTORE
+        # PUSH1 0x02
+        # PUSH1 0x0d
+        # PUSH1 0x13
+        # PUSH1 0x00
+        # CREATE2
+        contract = self.evm.create_contract(bytecode="6000600060006000f56000600060006000f56001600060006009f56c63ffffffff6000526004601cf36000526002600d60136000f5", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
+
+        created_contract_1_address = get_create2_contract_address(origin_address=self.eoa_1, salt=0, initialisation_code="")
+        created_contract_2_address = get_create2_contract_address(origin_address=self.eoa_1, salt=1, initialisation_code="")
+        created_contract_3_address = get_create2_contract_address(origin_address=self.eoa_1, salt=2, initialisation_code="63ffffffff6000526004601cf3")
+
+        self.assertEqual(operation.stack, [created_contract_1_address[2:], "0", created_contract_2_address[2:], created_contract_3_address[2:]])
+        self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000063ffffffff6000526004601cf3")
+
+        self.assertEqual(self.evm.address_to_contract[created_contract_1_address].bytecode, "")
+        self.assertEqual(self.evm.address_to_contract[created_contract_2_address].bytecode, "")
+        self.assertEqual(self.evm.address_to_contract[created_contract_3_address].bytecode, "ffffffff")
