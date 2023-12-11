@@ -48,6 +48,7 @@ class Operation:
         print(f"parsed_bytecode: {self.parsed_bytecode}")
         print(f"program_counter: {self.program_counter}")
         print(f"transaction_metadata: {self.transaction_metadata}")
+        print(f"operation_metadata: {self.operation_metadata}")
         print(f"stack: {self.stack}")
         print(f"memory: {self.memory}")
         print(f"status: {self.status}")
