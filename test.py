@@ -22,6 +22,7 @@ class OpcodeTestCase(unittest.TestCase):
         self.evm = EVM()
         self.address_1 = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
         self.address_2 = "0xd8da6bf26964af9d7eed9e03e53415d37aa96046"
+        self.eoa_1 = "0xd8da6bf26964af9d7eed9e03e53415d37aa96047"
 
     def test_stop(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='600a00600a'_
@@ -29,7 +30,7 @@ class OpcodeTestCase(unittest.TestCase):
         # STOP
         # PUSH1 0x0a
         self.evm.create_contract(bytecode="600a00600a", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["a"])
 
     def test_push0(self):
@@ -37,7 +38,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH0
         # PUSH0
         self.evm.create_contract(bytecode="5f5f", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["0", "0"])
 
     def test_push1(self):
@@ -45,7 +46,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0xff
         # PUSH1 0x00
         self.evm.create_contract(bytecode="60ff6000", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ff", "0"])
 
     def test_push31(self):
@@ -54,14 +55,14 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH31 0x00000000000000000000000000000000000000000000000000000000000000
         self.evm.create_contract(
             bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e00000000000000000000000000000000000000000000000000000000000000", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "0"])
 
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='7ezzzzz7e7e0a'~ffffffz~~%01z~_
         # PUSH31 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e
         # PUSH31 0x0a
         self.evm.create_contract(bytecode="7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e7e0a", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7e", "a"])
 
     def test_push32(self):
@@ -70,7 +71,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH32 0x0000000000000000000000000000000000000000000000000000000000000000
         self.evm.create_contract(
             bytecode="7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "0"])
 
     def test_dup1(self):
@@ -78,7 +79,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # DUP1
         self.evm.create_contract(bytecode="600180", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "1"])
 
     def test_dup2(self):
@@ -87,7 +88,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # DUP2
         self.evm.create_contract(bytecode="6001600081", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "0", "1"])
 
     def test_dup15(self):
@@ -109,7 +110,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # DUP15
         self.evm.create_contract(bytecode="6001600060006000600060006000600060006000600060006000600060008e", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"])
 
@@ -133,7 +134,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # DUP16
         self.evm.create_contract(bytecode="60016000600060006000600060006000600060006000600060006000600060008f", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"])
 
@@ -143,7 +144,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP1
         self.evm.create_contract(bytecode="6002600190", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "2"])
 
     def test_swap2(self):
@@ -153,7 +154,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP2
         self.evm.create_contract(bytecode="60026000600191", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "0", "2"])
 
     def test_swap15(self):
@@ -176,7 +177,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP15
         self.evm.create_contract(bytecode="60026000600060006000600060006000600060006000600060006000600060019e", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
 
@@ -201,7 +202,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SWAP16
         self.evm.create_contract(bytecode="600260006000600060006000600060006000600060006000600060006000600060019f", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack,
                          ["1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2"])
 
@@ -211,7 +212,7 @@ class OpcodeTestCase(unittest.TestCase):
         # POP
         # CODESIZE
         self.evm.create_contract(bytecode="7c00000000000000000000000000000000000000000000000000000000005038", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["20"])
 
     def test_codecopy(self):
@@ -229,7 +230,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # CODECOPY
         self.evm.create_contract(bytecode="7dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000005050602060006000396008601f600039", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "7f00000000000000ffffffffffffffffffffffffffffffffffffffffffffff7f")
 
@@ -247,7 +248,7 @@ class OpcodeTestCase(unittest.TestCase):
         # CREATE
         # EXTCODESIZE
         self.evm.create_contract(bytecode="7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f30000000000000000000000000000000000000000000000602052602960006000f03b", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["20"])
         self.assertEqual("".join(operation.memory), "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260206000f30000000000000000000000000000000000000000000000")
 
@@ -280,7 +281,7 @@ class OpcodeTestCase(unittest.TestCase):
         # DUP4
         # EXTCODECOPY
         self.evm.create_contract(bytecode="7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f30000000000000000000000000000000000000000000000602052602960006000f060006000526000602052602060006000833c6008601f6000833c", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [operation.create_contracts[0].address[2:]])
         self.assertEqual("".join(operation.memory), "ff00000000000000ffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000")
 
@@ -308,7 +309,7 @@ class OpcodeTestCase(unittest.TestCase):
         # STATICCALL
         # RETURNDATASIZE
         self.evm.create_contract(bytecode="7f7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff6000527fff60005260206000f30000000000000000000000000000000000006020527f000000000060205260296000f300000000000000000000000000000000000000604052604d60006000f060006000600060008463fffffffffa3d", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["3e4ea2156166390f880071d94458efb098473311", "1", "20"])
         self.assertEqual("".join(operation.memory), "7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f3000000000000000000000000000000000000000000000060205260296000f300000000000000000000000000000000000000")
 
@@ -354,7 +355,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x20
         # RETURNDATACOPY
         self.evm.create_contract(bytecode="7f7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff6000527fff60005260206000f30000000000000000000000000000000000006020527f000000000060205260296000f300000000000000000000000000000000000000604052604d60006000f060006000600060008463fffffffffa50506000600052600060205260006040526020600060003e6001601f60203e", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 
@@ -362,21 +363,21 @@ class OpcodeTestCase(unittest.TestCase):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='45'_
         # GASLIMIT
         self.evm.create_contract(bytecode="45", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ffffffffffff"])
 
     def test_chainid(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='46'_
         # CHAINID
         self.evm.create_contract(bytecode="46", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1"])
 
     def test_basefee(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='48'_
         # BASEFEE
         contract = self.evm.create_contract(bytecode="48", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["a"])
 
     def test_pop(self):
@@ -384,7 +385,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH3 0x01ec21
         # POP
         self.evm.create_contract(bytecode="6201ec2150", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
 
     def test_add(self):
@@ -397,7 +398,7 @@ class OpcodeTestCase(unittest.TestCase):
         # ADD
         self.evm.create_contract(
             bytecode="600a600a017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600101", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["14", "0"])
 
     def test_mul(self):
@@ -410,7 +411,7 @@ class OpcodeTestCase(unittest.TestCase):
         # MUL
         self.evm.create_contract(
             bytecode="600a600a027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600202", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["64", "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"])
 
     def test_sub(self):
@@ -422,7 +423,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # SUB
         self.evm.create_contract(bytecode="600a600a036001600003", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["0", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"])
 
     def test_div(self):
@@ -434,7 +435,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # DIV
         contract = self.evm.create_contract(bytecode="600a600a046002600104", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_mod(self):
@@ -446,7 +447,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x11
         # MOD
         self.evm.create_contract(bytecode="6003600a066005601106", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "2"])
 
     def test_addmod(self):
@@ -460,7 +461,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # ADDMOD
         self.evm.create_contract(bytecode="6008600a600a08600260027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff08", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["4", "1"])
 
     def test_mulmod(self):
@@ -474,7 +475,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH32 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         # MULMOD
         self.evm.create_contract(bytecode="6008600a600a09600c7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff09", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["4", "9"])
 
     def test_lt(self):
@@ -486,7 +487,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # LT
         self.evm.create_contract(bytecode="600a600910600a600a10", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_gt(self):
@@ -498,7 +499,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # GT
         self.evm.create_contract(bytecode="6009600a11600a600a11", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_eq(self):
@@ -510,7 +511,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x0a
         # EQ
         self.evm.create_contract(bytecode="600a600a146005600a14", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "0"])
 
     def test_iszero(self):
@@ -520,7 +521,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # ISZERO
         self.evm.create_contract(bytecode="600a15600015", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["0", "1"])
 
     def test_and(self):
@@ -532,7 +533,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0xff
         # AND
         self.evm.create_contract(bytecode="600f600f16600060ff16", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["f", "0"])
 
     def test_or(self):
@@ -544,7 +545,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0xff
         # OR
         self.evm.create_contract(bytecode="600f60f01760ff60ff17", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ff", "ff"])
 
     def test_xor(self):
@@ -556,7 +557,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0xff
         # XOR
         self.evm.create_contract(bytecode="600f60f01860ff60ff18", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ff", "0"])
 
     def test_not(self):
@@ -571,7 +572,7 @@ class OpcodeTestCase(unittest.TestCase):
         # NOT
         self.evm.create_contract(bytecode="6000196001197fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                                      "ffff197fffffffff00ffffffffffffffffffffffffffffffffffffffffffff00ffffffff19", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(
             operation.stack,
             [
@@ -594,7 +595,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x20
         # BYTE
         self.evm.create_contract(bytecode="60ff601f1a61ff00601e1a60ff60201a", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ff", "ff", "0"])
 
     def test_shl(self):
@@ -606,7 +607,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x04
         # SHL
         self.evm.create_contract(bytecode="600160011b7fff0000000000000000000000000000000000000000000000000000000000000060041b", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["2", "f000000000000000000000000000000000000000000000000000000000000000"])
 
     def test_shr(self):
@@ -618,7 +619,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x04
         # SHR
         self.evm.create_contract(bytecode="600260011c60ff60041c", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "f"])
 
     def test_sload(self):
@@ -631,7 +632,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # SLOAD
         contract = self.evm.create_contract(bytecode="602e600055600054600154", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["2e", "0"])
         self.assertEqual(contract.storage, {"0": "2e"})
 
@@ -644,7 +645,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH2 0x2305
         # SSTORE
         contract = self.evm.create_contract(bytecode="61ffff6000556100ff61230555", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual(contract.storage, {"0": "ffff", "2305": "ff"})
 
@@ -657,7 +658,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # MSTORE
         self.evm.create_contract(bytecode="60ff60005260ff600152", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000000000000000000000000000000ff00000000000000000000000000000000000000000000000000000000000000")
 
@@ -670,7 +671,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # MSTORE8
         self.evm.create_contract(bytecode="61ffee60005360ff600153", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "eeff000000000000000000000000000000000000000000000000000000000000")
 
@@ -684,7 +685,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # MLOAD
         self.evm.create_contract(bytecode="7f00000000000000000000000000000000000000000000000000000000000000ff600052600051600151", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["ff", "ff00"])
         self.assertEqual("".join(operation.memory), "00000000000000000000000000000000000000000000000000000000000000ff0000000000000000000000000000000000000000000000000000000000000000")
 
@@ -700,7 +701,7 @@ class OpcodeTestCase(unittest.TestCase):
         # POP
         # MSIZE
         self.evm.create_contract(bytecode="5960005150596039515059", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["0", "20", "60"])
         self.assertEqual("".join(operation.memory), "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 
@@ -709,7 +710,7 @@ class OpcodeTestCase(unittest.TestCase):
         # JUMPDEST
         # JUMPDEST
         self.evm.create_contract(bytecode="5b5b", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
 
     def test_jump(self):
@@ -720,7 +721,7 @@ class OpcodeTestCase(unittest.TestCase):
         # JUMPDEST
         # PUSH1 0x01
         self.evm.create_contract(bytecode="600456fe5b6001", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1"])
 
     def test_jumpi(self):
@@ -736,7 +737,7 @@ class OpcodeTestCase(unittest.TestCase):
         # JUMPDEST
         # PUSH1 0x01
         self.evm.create_contract(bytecode="6000600a576001600c575bfe5b6001", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1"])
 
     def test_pc(self):
@@ -748,14 +749,14 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x01
         # PC
         self.evm.create_contract(bytecode="58585b58600158", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["0", "1", "3", "1", "6"])
 
     def test_callvalue(self):
         # https://www.evm.codes/playground?fork=shanghai&callValue=123456789&unit=Wei&codeType=Bytecode&code='34'_
         # CALLVALUE
         self.evm.create_contract(bytecode="34", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(value="123456789"))
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(value="123456789", from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["75bcd15"])
 
     def test_calldataload(self):
@@ -765,7 +766,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x1f
         # CALLDATALOAD
         self.evm.create_contract(bytecode="600035601f35", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", from_address=self.eoa_1))
         self.assertEqual(operation.stack, [
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
             "ff00000000000000000000000000000000000000000000000000000000000000",
@@ -775,7 +776,7 @@ class OpcodeTestCase(unittest.TestCase):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0xff&codeType=Bytecode&code=%2736%27_
         # CALLDATASIZE
         self.evm.create_contract(bytecode="36", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xff"))
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xff", from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1"])
 
     def test_calldatacopy(self):
@@ -789,7 +790,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # CALLDATACOPY
         self.evm.create_contract(bytecode="602060006000376008601f600037", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(data="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "ff00000000000000ffffffffffffffffffffffffffffffffffffffffffffffff")
 
@@ -801,7 +802,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # LOG0
         contract = self.evm.create_contract(bytecode="60ff60005260206000a0", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual(contract.logs, [{"data": "0xff"}])
 
@@ -814,7 +815,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # LOG1
         contract = self.evm.create_contract(bytecode="60ff6000527fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a1", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual(contract.logs, [{
             "data": "0xff",
@@ -831,7 +832,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # LOG2
         contract = self.evm.create_contract(bytecode="60ff6000527f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a2", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual(contract.logs, [{
             "data": "0xff",
@@ -850,7 +851,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # LOG3
         contract = self.evm.create_contract(bytecode="60ff6000527f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60206000a3", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual(contract.logs, [{
             "data": "0xff",
@@ -871,7 +872,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # LOG4
         contract = self.evm.create_contract(bytecode="60ff6000526f000002ccc2087078963d621f42338ab07f0000000000000000000000004f6742badb049791cd9a37ea913f2bac38d012797f000000000000000000000000bae7ebe87fc708426a193f49c4829cdc6221ac847fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef603c6000a4", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual(contract.logs, [{
             "data": "0xff00000000000000000000000000000000000000000000000000000000",
@@ -890,7 +891,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # RETURN
         self.evm.create_contract(bytecode="7fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef6000527f00000000000000000000000000000000000000000000000000000000000000226000f3", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000000000000000000000000000000000000000000000000000000000000000")
         self.assertEqual(operation.return_bytes, "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000")
@@ -904,7 +905,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # SHA3
         self.evm.create_contract(bytecode="7fffffffff000000000000000000000000000000000000000000000000000000006000526004600020", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["29045a592007d0c246ef02c2223570da9522d0cf0f73282c79a1bc8f0bb2c238"])
         self.assertEqual("".join(operation.memory), "ffffffff00000000000000000000000000000000000000000000000000000000")
 
@@ -912,8 +913,15 @@ class OpcodeTestCase(unittest.TestCase):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='30'_
         # ADDRESS
         self.evm.create_contract(bytecode="30", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [self.address_1[2:]])
+
+    def test_caller(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='33'_
+        # CALLER
+        self.evm.create_contract(bytecode="33", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
+        self.assertEqual(operation.stack, [self.eoa_1[2:]])
 
     def test_invalid(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='6100ff61230555fe6001'_
@@ -923,7 +931,7 @@ class OpcodeTestCase(unittest.TestCase):
         # INVALID
         # PUSH1 0x01
         contract = self.evm.create_contract(bytecode="6100ff61230555fe6001", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual(contract.storage, {})
         self.assertEqual("".join(operation.memory), "")
@@ -941,7 +949,7 @@ class OpcodeTestCase(unittest.TestCase):
         # REVERT
         # PUSH1 0x42
         contract = self.evm.create_contract(bytecode="6042600052602060006100ff61230555fd6042", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [])
         self.assertEqual("".join(operation.memory), "0000000000000000000000000000000000000000000000000000000000000042")
         self.assertEqual(contract.storage, {})
@@ -979,7 +987,7 @@ class OpcodeTestCase(unittest.TestCase):
         # CALL
         self.evm.create_contract(bytecode="6000600060006000600073d8da6bf26964af9d7eed9e03e53415d37aa9604561fffff16000600060206000600073d8da6bf26964af9d7eed9e03e53415d37aa9604561ffff7067600035600757fe5b60005260086018f3600052f1", address=self.address_2)
 
-        operation = self.evm.execute_transaction(address=self.address_2, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_2, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["0", "1"])
         self.assertEqual("".join(operation.memory), "00000000000000000000000000000067600035600757fe5b60005260086018f3")
         self.assertEqual(operation.return_bytes, "")
@@ -1008,7 +1016,7 @@ class OpcodeTestCase(unittest.TestCase):
         # STATICCALL
         self.evm.create_contract(bytecode="7f7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff6000527fff60005260206000f30000000000000000000000000000000000006020527f000000000060205260296000f300000000000000000000000000000000000000604052604d60006000f060006000600060008463fffffffffa", address=self.address_1)
 
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["3e4ea2156166390f880071d94458efb098473311", "1"])
         self.assertEqual("".join(operation.memory), "7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6000527fff60005260206000f3000000000000000000000000000000000000000000000060205260296000f300000000000000000000000000000000000000")
         self.assertEqual(operation.return_bytes, "")
@@ -1031,7 +1039,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x00
         # CREATE
         contract = self.evm.create_contract(bytecode="600060006000f0600060006009f06c63ffffffff6000526004601cf3600052600d60136000f0", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
 
         created_contract_1_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=0)
         created_contract_2_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=1)
@@ -1069,7 +1077,7 @@ class OpcodeTestCase(unittest.TestCase):
         self.evm = EVM()
 
         contract = self.evm.create_contract(bytecode="600060006000f0600060006009f06c63ffffffff6000526004601cf3600052600d60136000f060006000fd", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
 
         created_contract_1_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=0)
         created_contract_2_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=1)
@@ -1111,7 +1119,7 @@ class OpcodeTestCase(unittest.TestCase):
         self.evm = EVM()
 
         contract = self.evm.create_contract(bytecode="600060006000f0600060006009f060fe6000526001601f6000f06c63ffffffff6000526004601cf3600052600d60136000f0", address=self.address_1)
-        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata())
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
 
         created_contract_1_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=0)
         created_contract_2_address = get_create_contract_address(sender_address=self.address_1, sender_nonce=1)

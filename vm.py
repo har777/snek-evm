@@ -289,6 +289,12 @@ class Operation:
             self.program_counter += 1
             return
 
+        # CALLER
+        elif opcode == "33":
+            self.stack.append(self.transaction_metadata.from_address[2:])
+            self.program_counter += 1
+            return
+
         # CALLVALUE
         elif opcode == "34":
             call_value = hex(int(self.transaction_metadata.value))[2:]
@@ -689,7 +695,7 @@ class Operation:
             create_contract = self.evm.create_contract(bytecode=create_bytecode, address=create_address)
             operation = self.evm.execute_transaction(
                 address=create_address,
-                transaction_metadata=TransactionMetadata()
+                transaction_metadata=TransactionMetadata(from_address=self.contract.address)
             )
             if operation.status == OperationStatus.FAILURE:
                 self.stack.append("0")
@@ -726,7 +732,7 @@ class Operation:
 
             operation = self.evm.execute_transaction(
                 address=address,
-                transaction_metadata=TransactionMetadata(data=operation_calldata),
+                transaction_metadata=TransactionMetadata(data=operation_calldata, from_address=self.contract.address),
                 is_static_call_context=self.is_static_call_context
             )
 
@@ -787,7 +793,7 @@ class Operation:
 
             operation = self.evm.execute_transaction(
                 address=address,
-                transaction_metadata=TransactionMetadata(data=operation_calldata),
+                transaction_metadata=TransactionMetadata(data=operation_calldata, from_address=self.contract.address),
                 is_static_call_context=True
             )
 
@@ -880,16 +886,17 @@ class Contract:
 
 
 class TransactionMetadata:
-    def __init__(self, value="0", data="0x"):
+    def __init__(self, from_address, value="0", data="0x"):
         # calldata has to be even length if present
         if len(data) % 2 != 0:
             raise Exception("Invalid calldata length")
 
+        self.from_address = from_address
         self.value = value
         self.data = data
 
     def __str__(self):
-        return f"TransactionMetadata(value={self.value}, data={self.data})"
+        return f"TransactionMetadata(from={self.from_address} value={self.value}, data={self.data})"
 
 
 class EVM:

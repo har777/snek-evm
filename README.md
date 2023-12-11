@@ -86,7 +86,7 @@ child_operations = operation.child_operations
 | 30   | ADDRESS        | ✅           |
 | 31   | BALANCE        |             |
 | 32   | ORIGIN         |             |
-| 33   | CALLER         |             |
+| 33   | CALLER         | ✅           |
 | 34   | CALLVALUE      | ✅           |
 | 35   | CALLDATALOAD   | ✅           |
 | 36   | CALLDATASIZE   | ✅           |
