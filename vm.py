@@ -943,8 +943,8 @@ class Operation:
 
 class Contract:
     def __init__(self, bytecode, address):
-        self.bytecode = bytecode
-        self.address = address
+        self.bytecode = bytecode.lower()
+        self.address = address.lower()
         self.nonce = 0
         self.storage = {}
         self.logs = []
@@ -959,9 +959,9 @@ class TransactionMetadata:
         if len(data) % 2 != 0:
             raise Exception("Invalid calldata length")
 
-        self.from_address = from_address
+        self.from_address = from_address.lower()
         self.value = value
-        self.data = data
+        self.data = data.lower()
 
     def __str__(self):
         return f"TransactionMetadata(from={self.from_address} value={self.value}, data={self.data})"
