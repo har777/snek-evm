@@ -67,7 +67,7 @@ child_operations = operation.child_operations
 | 07   | SMOD           |             |
 | 08   | ADDMOD         | ✅           |
 | 09   | MULMOD         | ✅           |
-| 0A   | EXP            |             |
+| 0A   | EXP            | ✅           |
 | 0B   | SIGNEXTEND     |             |
 | 10   | LT             | ✅           |
 | 11   | GT             | ✅           |

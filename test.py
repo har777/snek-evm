@@ -493,7 +493,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x02
         # PUSH1 0x01
         # DIV
-        contract = self.evm.create_contract(bytecode="600a600a046002600104", address=self.address_1)
+        self.evm.create_contract(bytecode="600a600a046002600104", address=self.address_1)
         operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["1", "0"])
 
@@ -536,6 +536,36 @@ class OpcodeTestCase(unittest.TestCase):
         self.evm.create_contract(bytecode="6008600a600a09600c7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff09", address=self.address_1)
         operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, ["4", "9"])
+
+    def test_exp(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~2~0x0z~0~0x2~ax4y11fy100y0ffz'~600z~20ayz610x0a~%01xyz~_
+        # PUSH1 0x02
+        # PUSH1 0x00
+        # EXP
+        # PUSH1 0x00
+        # PUSH1 0x02
+        # EXP
+        # PUSH1 0x00
+        # PUSH1 0x00
+        # EXP
+        # PUSH1 0x02
+        # PUSH1 0x0a
+        # EXP
+        # PUSH1 0x04
+        # PUSH1 0x02
+        # EXP
+        # PUSH2 0x011f
+        # PUSH1 0x02
+        # EXP
+        # PUSH2 0x0100
+        # PUSH1 0x02
+        # EXP
+        # PUSH2 0x00ff
+        # PUSH1 0x02
+        # EXP
+        self.evm.create_contract(bytecode="600260000a600060020a600060000a6002600a0a600460020a61011f60020a61010060020a6100ff60020a", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
+        self.assertEqual(operation.stack, ["0", "1", "1", "64", "10", "0", "0", "8000000000000000000000000000000000000000000000000000000000000000"])
 
     def test_lt(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='~a~910~a~a10'~600%01~_
@@ -1227,7 +1257,7 @@ class OpcodeTestCase(unittest.TestCase):
         # PUSH1 0x13
         # PUSH1 0x00
         # CREATE2
-        contract = self.evm.create_contract(bytecode="6000600060006000f56000600060006000f56001600060006009f56c63ffffffff6000526004601cf36000526002600d60136000f5", address=self.address_1)
+        self.evm.create_contract(bytecode="6000600060006000f56000600060006000f56001600060006009f56c63ffffffff6000526004601cf36000526002600d60136000f5", address=self.address_1)
         operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
 
         created_contract_1_address = get_create2_contract_address(origin_address=self.eoa_1, salt=0, initialisation_code="")

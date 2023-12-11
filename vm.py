@@ -154,6 +154,17 @@ class Operation:
             self.program_counter += 1
             return
 
+        # EXP
+        elif opcode == "0a":
+            a = int(self.stack.pop(), 16)
+            exponent = int(self.stack.pop(), 16)
+
+            c = hex(pow(a, exponent, 2**256))[2:]
+
+            self.stack.append(c)
+            self.program_counter += 1
+            return
+
         # LT a b
         elif opcode == "10":
             a = int(self.stack.pop(), 16)
