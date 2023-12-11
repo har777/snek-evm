@@ -14,7 +14,7 @@ class OperationStatus(Enum):
 
 
 class Operation:
-    def __init__(self, evm, address, transaction_metadata, is_static_call_context=False):
+    def __init__(self, evm, address, transaction_metadata, operation_metadata):
         self.status = OperationStatus.EXECUTING
 
         self.evm = evm
@@ -26,8 +26,7 @@ class Operation:
         self.parsed_bytecode = [bytecode[i:i+2] for i in range(0, len(bytecode), 2)]
 
         self.transaction_metadata = transaction_metadata
-
-        self.is_static_call_context = is_static_call_context
+        self.operation_metadata = operation_metadata
 
         # pointer used to decide what opcode to step into next
         self.program_counter = 0
@@ -289,6 +288,16 @@ class Operation:
             self.program_counter += 1
             return
 
+        # ORIGIN
+        elif opcode == "32":
+            parent_operation = self
+            while parent_operation.operation_metadata.parent_operation:
+                parent_operation = parent_operation.operation_metadata.parent_operation
+
+            self.stack.append(parent_operation.transaction_metadata.from_address[2:])
+            self.program_counter += 1
+            return
+
         # CALLER
         elif opcode == "33":
             self.stack.append(self.transaction_metadata.from_address[2:])
@@ -421,7 +430,7 @@ class Operation:
 
         # SSTORE
         elif opcode == "55":
-            if self.is_static_call_context:
+            if self.operation_metadata.is_static_call_context:
                 self.rollback()
                 return
 
@@ -521,7 +530,7 @@ class Operation:
 
         # LOG0 to LOG4
         elif opcode in {"a0", "a1", "a2", "a3", "a4"}:
-            if self.is_static_call_context:
+            if self.operation_metadata.is_static_call_context:
                 self.rollback()
                 return
 
@@ -677,7 +686,7 @@ class Operation:
 
         # CREATE
         elif opcode == "f0":
-            if self.is_static_call_context:
+            if self.operation_metadata.is_static_call_context:
                 self.rollback()
                 return
 
@@ -695,7 +704,8 @@ class Operation:
             create_contract = self.evm.create_contract(bytecode=create_bytecode, address=create_address)
             operation = self.evm.execute_transaction(
                 address=create_address,
-                transaction_metadata=TransactionMetadata(from_address=self.contract.address)
+                transaction_metadata=TransactionMetadata(from_address=self.contract.address),
+                operation_metadata=OperationMetadata(is_static_call_context=self.operation_metadata.is_static_call_context, parent_operation=self)
             )
             if operation.status == OperationStatus.FAILURE:
                 self.stack.append("0")
@@ -720,7 +730,7 @@ class Operation:
             ret_offset = int(self.stack.pop(), 16)
             ret_size = int(self.stack.pop(), 16)
 
-            if self.is_static_call_context and value != 0:
+            if self.operation_metadata.is_static_call_context and value != 0:
                 self.rollback()
                 return
 
@@ -733,7 +743,7 @@ class Operation:
             operation = self.evm.execute_transaction(
                 address=address,
                 transaction_metadata=TransactionMetadata(data=operation_calldata, from_address=self.contract.address),
-                is_static_call_context=self.is_static_call_context
+                operation_metadata=OperationMetadata(is_static_call_context=self.operation_metadata.is_static_call_context, parent_operation=self)
             )
 
             self.child_operations.append(operation)
@@ -794,7 +804,7 @@ class Operation:
             operation = self.evm.execute_transaction(
                 address=address,
                 transaction_metadata=TransactionMetadata(data=operation_calldata, from_address=self.contract.address),
-                is_static_call_context=True
+                operation_metadata=OperationMetadata(is_static_call_context=True, parent_operation=self)
             )
 
             self.child_operations.append(operation)
@@ -899,6 +909,15 @@ class TransactionMetadata:
         return f"TransactionMetadata(from={self.from_address} value={self.value}, data={self.data})"
 
 
+class OperationMetadata:
+    def __init__(self, is_static_call_context=False, parent_operation=None):
+        self.is_static_call_context = is_static_call_context
+        self.parent_operation = parent_operation
+
+    def __str__(self):
+        return f"OperationMetadata(is_static_call_context={self.is_static_call_context}, parent_operation={self.parent_operation})"
+
+
 class EVM:
     def __init__(self):
         self.address_to_contract = {}
@@ -908,12 +927,15 @@ class EVM:
         self.address_to_contract[address] = contract
         return contract
 
-    def execute_transaction(self, address, transaction_metadata, is_static_call_context=False, debug=False):
+    def execute_transaction(self, address, transaction_metadata, operation_metadata=None, debug=False):
+        if not operation_metadata:
+            operation_metadata = OperationMetadata()
+
         operation = Operation(
             evm=self,
             address=address,
             transaction_metadata=transaction_metadata,
-            is_static_call_context=is_static_call_context,
+            operation_metadata=operation_metadata,
         )
         operation.execute(debug=debug)
         return operation

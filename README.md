@@ -85,7 +85,7 @@ child_operations = operation.child_operations
 | 20   | SHA3           | ✅           |
 | 30   | ADDRESS        | ✅           |
 | 31   | BALANCE        |             |
-| 32   | ORIGIN         |             |
+| 32   | ORIGIN         | ✅           |
 | 33   | CALLER         | ✅           |
 | 34   | CALLVALUE      | ✅           |
 | 35   | CALLDATALOAD   | ✅           |

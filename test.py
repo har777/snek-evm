@@ -916,6 +916,13 @@ class OpcodeTestCase(unittest.TestCase):
         operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
         self.assertEqual(operation.stack, [self.address_1[2:]])
 
+    def test_origin(self):
+        # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='32'_
+        # ORIGIN
+        self.evm.create_contract(bytecode="32", address=self.address_1)
+        operation = self.evm.execute_transaction(address=self.address_1, transaction_metadata=TransactionMetadata(from_address=self.eoa_1))
+        self.assertEqual(operation.stack, [self.eoa_1[2:]])
+
     def test_caller(self):
         # https://www.evm.codes/playground?fork=shanghai&unit=Wei&codeType=Bytecode&code='33'_
         # CALLER
