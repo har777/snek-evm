@@ -29,16 +29,17 @@ bytecode, address, nonce, storage, logs = (
 # operation state evolve as each opcode gets executed
 operation = evm.execute_transaction(
     address="0xd8da6bf26964af9d7eed9e03e53415d37aa96045", 
-    transaction_metadata=TransactionMetadata()
+    transaction_metadata=TransactionMetadata(from_address="0xd8da6bf26964af9d7eed9e03e53415d37aa96046")
 )
 
 # populate TransactionMetadata with fields necessary for executing the bytecode
-# ------------------------------------
-# field     |      default_value
-# ------------------------------------
-# data      |      "0x"
-# value     |      "0"
-# ------------------------------------
+# -----------------------------------------
+# field          |      default_value
+# -----------------------------------------
+# from_address   |
+# data           |      "0x"
+# value          |      "0"
+# -----------------------------------------
 
 # access stack, memory and return_value from the operation
 stack, memory, return_bytes = (
